@@ -1,8 +1,8 @@
-# مستودع المونتاج الحلال — بلقن Video-Edit + مكتبة الخلفيات الحلال
+# مستودع المونتاج الحلال — Video edit (halal) + مكتبة الخلفيات الحلال
 
-- `.claude/skills/` — سكلات المونتاج: `video-ad-editor` (المحرّك) · `montage-video` · `motion-video` · `podcast-video` · `thumbnail-video`.
-  نفس ملفات بلقن **Video-Edit** اللي ينزل على الأجهزة من `.claude-plugin/marketplace.json`.
-- `halal-audio/` — مكتبة الخلفيات الحلال (أصوات بشرية بلا موسيقى، علو موحّد، `catalog.json`).
+هذا المستودع هو أصل بلقنين ينزلون من حساب المستخدم بـclaude.ai على أجهزته:
+- `.claude/skills/` — بلقن **video-edit-halal**: `video-ad-editor` (المحرّك) · `montage-video` · `motion-video` · `podcast-video` · `thumbnail-video`.
+- `halal-audio/` — بلقن **halal-audio**: الخلفيات الحلال (أصوات بشرية بلا موسيقى، علو موحّد، `catalog.json`).
   `42_bg_audio.py` و`motion/audio.py` يلقونها وحدهم — لا تمرّر مسار.
 
 ## بجلسة السحابة
@@ -13,6 +13,12 @@
 - **لينكس:** ميزات الماك (قصّ الشخص، تتبّع الوجه بـVision) ما تشتغل — البدائل بـ`references/any-environment.md`.
 - **صفحة التصنيف** (`42_bg_audio.py page`) تحتاج متصفح على جهازه — بالسحابة `list` و`suggest` و`pick` بس.
 
+## لما تعدّل هالمستودع (على جهاز المستخدم)
+- أي تعديل بـ`.claude/skills/` ← ارفع `version` بـ`.claude/skills/.claude-plugin/plugin.json` و`video-ad-editor/VERSION` (`6.0.1-halal.N`).
+- ملفات صوت جديدة ← `build` هني (`references/bg-library.md`) ← ارفع `version` بـ`halal-audio/.claude-plugin/plugin.json`.
+  ⚠️ البلقن ~195 من 200 ميقا (حد claude.ai) — أكثر من كذا = بلقن أصوات ثاني.
+- بدون رفع الإصدار، حسابه ما يوزّع النسخة الجديدة على أجهزته.
+
 ## ⛔ لا تعدّل
-- `halal-audio/*.mp3` — نسخة معالجة. الإضافة بـ`build` على جهاز المستخدم (`README.md`).
-- `.claude/skills/` إلا بطلبه — أي تعديل هني يوصل لكل أجهزته بعد التحديث.
+- `halal-audio/*.mp3` — نسخة معالجة. الإضافة بـ`build` بس.
+- `.claude/skills/` إلا بطلبه — أي تعديل هني يوصل لكل أجهزته.

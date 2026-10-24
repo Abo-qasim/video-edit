@@ -1,0 +1,12 @@
+{
+  "name": "halal-audio",
+  "displayName": "Halal background audio",
+  "version": "1.0.0",
+  "description": "Companion to Video edit (halal): 57 halal background tracks (vocals only, no music), loudness-matched, with a catalog for picking the right one.",
+  "author": {
+    "name": "Abo-qasim"
+  },
+  "skills": [
+    "./"
+  ]
+}

@@ -17,7 +17,9 @@
   python 42_bg_audio.py where     ← وين المكتبة اللي ينقرا منها
 
 المكتبة تنلقى وحدها (الأول يفوز): BG_LIB ← halal-audio/ بالمستودع اللي فيه السكل (السحابة، أو نسخة قت هب)
-← halal-audio/ بمجلد المشروع ← نسخة البلقن من قت هب (~/.claude/plugins/marketplaces/*/halal-audio) ← ~/.claude/halal-audio.
+← halal-audio/ بمجلد المشروع ← بلقن halal-audio جنب هالبلقن (من حسابك بـclaude.ai أو من المتجر)
+← نسخة المتجر (~/.claude/plugins/marketplaces/*/halal-audio) ← ~/.claude/halal-audio.
+إضافة ملفات للمكتبة (build): بنسخة المستودع، مع BG_LIB=halal-audio — ثم ارفع إصدار بلقن halal-audio.
 تصنيف كل جهاز ينحفظ احتياطياً بـ~/.claude/halal-audio-tags.json — ما يضيع لو انعادت نسخة البلقن قبل المزامنة.
 الملفات الأصلية ما تنلمس — المكتبة نسخة معالجة. التفاصيل → references/bg-library.md
 """
@@ -39,17 +41,42 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 CONF = os.path.abspath(os.path.expanduser(os.environ.get("CLAUDE_CONFIG_DIR") or "~/.claude"))
 
 
+def is_lib(p):
+    """مجلد فيه catalog.json حق المكتبة (مو أي catalog.json — بنك الحركات عنده واحد بعد)."""
+    try:
+        with open(os.path.join(p, "catalog.json"), encoding="utf-8") as f: d = json.load(f)
+        return isinstance(d, dict) and "tracks" in d and "moods" in d
+    except (OSError, ValueError):
+        return False
+
+
+def sibling_libs():
+    """بلقن halal-audio جنب هالبلقن — نفس الأب أو جدّه: تطبيق الديسكتوب (rpm/<…>/plugin_*)،
+       كاش Claude Code (cache/<متجر>/<بلقن>/<إصدار>)، المزامنة من claude.ai (plugins/synced/…). الأحدث أول."""
+    root = os.path.dirname(os.path.dirname(HERE))                   # جذر البلقن: <root>/video-ad-editor/scripts
+    found, up = [], root
+    for _ in range(2):                                              # أب واحد (rpm، synced) أو اثنين (cache/<متجر>/<بلقن>/<إصدار>)
+        up = os.path.dirname(up)
+        for pat in ("*/catalog.json", "*/*/catalog.json"):
+            found += [os.path.dirname(p) for p in glob.glob(os.path.join(up, pat))]
+    found += [os.path.dirname(p) for p in glob.glob(os.path.join(CONF, "plugins", "synced", "**", "catalog.json"), recursive=True)]
+    libs = {os.path.realpath(p) for p in found if is_lib(p)}
+    return sorted(libs, key=lambda p: os.path.getmtime(os.path.join(p, "catalog.json")), reverse=True)
+
+
 def find_lib():
-    """(المسار، من وين) — أول مكان فيه catalog.json يفوز. لو ما فيه شي: المسار الافتراضي لـbuild."""
+    """(المسار، من وين) — أول مكان فيه مكتبة يفوز. لو ما فيه شي: المسار الافتراضي لـbuild."""
     if os.environ.get("BG_LIB"):
         return os.path.abspath(os.path.expanduser(os.environ["BG_LIB"])), "BG_LIB"
-    c = [(os.path.join(HERE, "..", "..", "..", "..", "halal-audio"), "المستودع")]   # <repo>/.claude/skills/video-ad-editor/scripts
-    for d in (os.environ.get("CLAUDE_PROJECT_DIR"), os.getcwd()):
-        if d: c.append((os.path.join(d, "halal-audio"), "مجلد المشروع"))
-    c += [(p, "نسخة البلقن من قت هب") for p in sorted(glob.glob(os.path.join(CONF, "plugins", "marketplaces", "*", "halal-audio")))]
-    c.append((os.path.join(CONF, "halal-audio"), "~/.claude/halal-audio"))
-    for p, why in c:
-        if os.path.isfile(os.path.join(p, "catalog.json")):
+    def cands():                                                    # بالترتيب، والبحث الأغلى يصير بس لو اللي قبله ما لقى
+        yield os.path.join(HERE, "..", "..", "..", "..", "halal-audio"), "المستودع"   # <repo>/.claude/skills/video-ad-editor/scripts
+        for d in (os.environ.get("CLAUDE_PROJECT_DIR"), os.getcwd()):
+            if d: yield os.path.join(d, "halal-audio"), "مجلد المشروع"
+        for p in sibling_libs(): yield p, "بلقن halal-audio"
+        for p in sorted(glob.glob(os.path.join(CONF, "plugins", "marketplaces", "*", "halal-audio"))): yield p, "نسخة المتجر من قت هب"
+        yield os.path.join(CONF, "halal-audio"), "~/.claude/halal-audio"
+    for p, why in cands():
+        if is_lib(p):
             return os.path.realpath(p), why                          # realpath: ويندوز يخلط 9649~1 بالاسم الطويل
     return os.path.realpath(os.path.join(CONF, "halal-audio")), "جديد"
 
@@ -258,11 +285,11 @@ def process(src, tid, lufs, old, force):
     os.replace(tmp, dst)
     if old and old["file"] != fname and os.path.exists(os.path.join(LIB, old["file"])):
         os.remove(os.path.join(LIB, old["file"]))
-    # الإيقاع: beat.py نفسه اللي يستخدمه المونتاج
-    bdir = os.path.join(LIB, ".beats"); os.makedirs(bdir, exist_ok=True)
-    bj = os.path.join(bdir, f"{tid}.json")
-    run([sys.executable, os.path.join(HERE, "beat.py"), dst, "--out", bj])
-    with open(bj, encoding="utf-8") as f: b = json.load(f)
+    # الإيقاع: beat.py نفسه اللي يستخدمه المونتاج — نحتاجه هني بس (البداية والانفجارات تنحفظ بالفهرس)، فما نخزّنه
+    with tempfile.TemporaryDirectory() as td:
+        bj = os.path.join(td, f"{tid}.json")
+        run([sys.executable, os.path.join(HERE, "beat.py"), dst, "--out", bj])
+        with open(bj, encoding="utf-8") as f: b = json.load(f)
     d_out = tail - lead
     peaks, low = features(dst, d_out)
     bpm = float(b.get("bpm", 0)); dens = len(b.get("onsets", [])) / max(1.0, d_out)

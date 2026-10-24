@@ -2,14 +2,15 @@
 
 # 🎧 مكتبة الخلفيات الحلال
 
-خلفيات صوتية جاهزة (أصوات بشرية بلا موسيقى — أناشيد خلفية) بمجلد `halal-audio/` بمستودع قت هب الخاص
-بالمستخدم — نفس المستودع اللي ينزل منه البلقن. كل ملف علوه موحّد ‎-16 LUFS وصمت طرفيه مقصوص،
-وبالفهرس `catalog.json`: المدة، السرعة، الطاقة، هل الإيقاع واضح (للمونتاج)، نقطة بداية على النبضة،
-والطابع والتقييم اللي حطّه المستخدم بأذنه.
+خلفيات صوتية جاهزة (أصوات بشرية بلا موسيقى — أناشيد خلفية) ببلقن **halal-audio** — رفيق هالبلقن،
+ينزل من حساب المستخدم بـclaude.ai على كل أجهزته (المصدر: مستودعه الخاص `video-edit-halal` بقت هب، مجلد `halal-audio/`).
+كل ملف علوه موحّد ‎-16 LUFS وصمت طرفيه مقصوص، وبالفهرس `catalog.json`: المدة، السرعة، الطاقة،
+هل الإيقاع واضح (للمونتاج)، نقطة بداية على النبضة، والطابع والتقييم اللي حطّه المستخدم بأذنه.
 
 **المكان ينلقى وحده** — لا تمرّر مسار: `BG_LIB` ← المستودع نفسه (جلسة السحابة، أو نسخته على الجهاز)
-← `halal-audio/` بمجلد المشروع ← نسخة البلقن من قت هب (`~/.claude/plugins/marketplaces/*/halal-audio`) ← `~/.claude/halal-audio`.
-تبي تتأكد؟ `python scripts/42_bg_audio.py where`.
+← `halal-audio/` بمجلد المشروع ← بلقن halal-audio جنب هالبلقن ← نسخة المتجر (`~/.claude/plugins/marketplaces/*/halal-audio`)
+← `~/.claude/halal-audio`. تبي تتأكد؟ `python scripts/42_bg_audio.py where`.
+ما لقاها؟ بلقن halal-audio مو مفعّل بحسابه — قل له يفعّله من **Customize ← Plugins**، أو مرّر `BG_LIB` بمسار سكل `halal-audio:library`.
 
 ## متى
 - **ما عطاك ملف صوتي بالخلفية والوضع يحتاجه** — المونتاج دايماً (بدونه ساكت)، أو قال «حط خلفية».
@@ -59,16 +60,16 @@ python scripts/42_bg_audio.py page          # يفتح http://127.0.0.1:8793
 ## المزامنة بين أجهزته
 - الصفحة تجيب تصنيف أجهزته الثانية لما تنفتح، وزر **«مزامنة مع قت هب»** يرفع تصنيف هالجهاز.
 - من الطرفية: `python scripts/42_bg_audio.py sync` (أو `--pull` يجيب بس).
-- كل تصنيف ينحفظ احتياطياً بـ`~/.claude/halal-audio-tags.json` — لو انعادت نسخة البلقن قبل المزامنة ما يضيع، والأحدث يفوز.
-- ⛔ **قبل تحديث البلقن** (`claude plugin marketplace update halal-video`) زامن أول.
+- كل تصنيف ينحفظ احتياطياً بـ`~/.claude/halal-audio-tags.json` — نسخة البلقن من حسابه تنعاد مع كل مزامنة، فالتصنيف ما يضيع، والأحدث يفوز.
+- المزامنة تحتاج دخول قت هب بهالجهاز (مرة وحدة). ما فيه؟ التصنيف يبقى بالجهاز ويشتغل عادي، ويوصل للباقي لما يزامن من جهاز مسجّل.
 
-## ملفات جديدة — بنسخة المستودع على جهازه بس
-بالمستودع (`git clone` لـ`video-edit-halal`)، حط الملفات بمجلد المصدر (`catalog.json ← source_dir`) وأعد:
+## ملفات جديدة — بنسخة المستودع على جهازه الرئيسي
+بالمستودع (`C:\Users\…\video-edit-halal` أو `git clone` له)، حط الملفات بمجلد المصدر (`catalog.json ← source_dir`):
 ```bash
-python .claude/skills/video-ad-editor/scripts/42_bg_audio.py build "<مجلد الملفات>"
-python .claude/skills/video-ad-editor/scripts/42_bg_audio.py sync      # يرفع الملفات الجديدة والفهرس
+BG_LIB=halal-audio python .claude/skills/video-ad-editor/scripts/42_bg_audio.py build "<مجلد الملفات>"
 ```
-اللي ما تغيّر ما ينعاد، والتصنيف يبقى. بعدها بأجهزته الثانية: `claude plugin marketplace update halal-video` و`claude plugin update Video-Edit@halal-video`.
+ثم **ارفع رقم الإصدار** بـ`halal-audio/.claude-plugin/plugin.json` (مثلاً `1.1.0`) وcommit + push — حسابه بـclaude.ai
+يسحب النسخة الجديدة لكل أجهزته وحده. ⚠️ بلقن الأصوات ~195 من 200 ميقا (حد claude.ai) — ملفات كثيرة؟ افتح بلقن أصوات ثاني.
 
 ## بجلسة السحابة (claude.ai/code)
 المستودع نفسه هو مجلد الجلسة: السكلات من `.claude/skills/`، والمكتبة `halal-audio/` تنلقى وحدها،

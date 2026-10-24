@@ -30,6 +30,8 @@ SKROOT="$(cd "$(dirname "$0")/.." && pwd)"; LOCALV="$(cat "$SKROOT/VERSION" 2>/d
 # v4: لو السكل منصّب كـplugin (majed-video) التحديث يكون من مدير الإضافات — مو بالاستبدال اليدوي
 case "$SKROOT" in */.claude/plugins/*) PLUGIN=1 ;; *) PLUGIN=0 ;; esac
 PLUG_UPD="claude plugin marketplace update majed-video && claude plugin update majed-video@majed-video"
+# نسخة halal (مكتبة الخلفيات الحلال): الاستبدال يمسح الإضافات — الإصدار الجديد ينـدمج فوقها بالمستودع (LOCAL-CHANGES.md)
+case "$LOCALV" in *halal*) PLUGIN=1; PLUG_UPD="ادمجه بنسخة halal بمستودع video-edit-halal (الخطوات بـLOCAL-CHANGES.md بجذر البلقن) — لا تستبدل الملفات" ;; esac
 if [ "$1" = "--update" ] && [ "$PLUGIN" = 1 ]; then
   echo "ℹ️ السكل منصّب كـplugin — شغّل: $PLUG_UPD  (ثم افتح جلسة جديدة)"; exit 0
 fi
