@@ -13,6 +13,17 @@
 
 المكتبة بجذر المستودع: `halal-audio/` (المصدر الأصلي: مجلد «الأصوات حلال» على جهاز المستخدم).
 
+## مكتبة المؤثرات الحلال (بلا موسيقى)
+| الملف | |
+|---|---|
+| `video-ad-editor/scripts/44_sfx_lib.py` | جديد — يلقى بلقن halal-sfx ويحمّل الأصوات (list · where · play) |
+| `video-ad-editor/scripts/43_sfx.py` + `sfx-review.html` | جديد — تنزيل جزئي من Sonniss + صفحة «مقبول / مرفوض» |
+| `video-ad-editor/scripts/05_sfx.py` | مفتاح `"lib"` بـ`sfx.json` — أصوات حقيقية بذروة ‎-18 dBFS |
+| `video-ad-editor/motion/audio.py` | نوع `lib:<تصنيف أو رقم>` بـ`sfx.json` |
+| `video-ad-editor/references/sfx-library.md` + أسطر بـ`SKILL.md` و`ENGINE-API.md` و`script-map.md` | الشرح |
+
+المكتبة بجذر المستودع: `halal-sfx/` (المصدر: ملف المستخدم + مجلد درايف ADAX DS، فرز YAMNet ثم مراجعته بأذنه).
+
 ## إصلاحات ويندوز
 | الملف | |
 |---|---|

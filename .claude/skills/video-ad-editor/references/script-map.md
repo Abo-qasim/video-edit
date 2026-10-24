@@ -54,7 +54,9 @@
 | `studio/studio.py` | الاستوديو — تايملاين باللمس فوق نفس الملفات والراسم (`references/studio.md`) | الخفيف |
 | `21_avatar_scene.py` | مشهد الأفاتار: صورة بمكان ثاني + يتكلم بصوته (`references/talking-avatar.md`) | fal |
 | `22_hook.py` + `hook-card.js` | 🪝 الهوك المكتوب أول كل ريل بودكاست/مقابلة: `suggest` أقوى السطور · `check` فاحص القواعد (3-8 كلمات، أداة شد، لهجة، الرقم من كلامه) · `apply` يكتب `theme.json ← hook` ويركّب الكرت · `preview` ورقة 4 لقطات · `overlay` طبقة شفافة `hook.mov` (أو محروقة فوق mp4) لريل مو من محرّكاتنا — خط المقابلة بدافنشي (`references/podcast-hook.md`) | مشترك |
-| `42_bg_audio.py` + `bg-library.html` | 🎧 مكتبة الخلفيات الحلال (`~/.claude/halal-audio`): `build` (قص صمت + علو موحّد ‎-16 + إيقاع → `catalog.json`) · `list` · `suggest` 3 معاينات · `pick` → `bg-audio.mp3` يبدأ على نبضة ويلف بتلاشٍ · `page` صفحة استماع وتصنيف (`references/bg-library.md`) | مشترك |
+| `44_sfx_lib.py` | 🔔 مكتبة المؤثرات الحلال (بلقن halal-sfx): `list` · `where` · `play` — والتحميل لـ`05_sfx.py` (`"lib"`) و`motion/audio.py` (`lib:…`) (`references/sfx-library.md`) | مشترك |
+| `43_sfx.py` + `sfx-review.html` | 🔔 تنزيل جزئي من حزم Sonniss (`fetch` — بايتات الملفات المختارة بس) + صفحة «مقبول / مرفوض» لأي دفعة أصوات (`review`) | مشترك |
+| `42_bg_audio.py` + `bg-library.html` | 🎧 مكتبة الخلفيات الحلال (بلقن halal-audio): `build` (قص صمت + علو موحّد ‎-16 + إيقاع → `catalog.json`) · `list` · `suggest` 3 معاينات · `pick` → `bg-audio.mp3` يبدأ على نبضة ويلف بتلاشٍ · `page` صفحة استماع وتصنيف (`references/bg-library.md`) | مشترك |
 | `moves-compose.js` | 🎞️ يشغّل حركات المعرض (`motion/moves.js` → `FX`) داخل ريل الكلام: `MV` = أدوات النص والتوقيت (من `caps.json`) والثيم فوق كانفس compose · `MV.video` · `MV.panel` · `MV.hideCaption` · `MV.scene` · `MV.ready` (`references/moves.md` §3) | الخفيف |
 
 ## ملفات مجلد الشغل

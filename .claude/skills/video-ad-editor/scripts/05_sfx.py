@@ -99,6 +99,14 @@ for t0 in _s.get("whoosh_down",[]): add(W2,t0,0.075)
 for t0 in _s.get("thud",[]):        add(TH,t0,0.115)
 for t0 in _s.get("tap",[]):         add(TP,t0,0.075)
 for t0,g in _s.get("soft",[]):      add(W1,t0,g)          # ووش بقوة تختارها: [[ثانية, قوة]] — العادي 0.085، الخفيف جداً 0.035
+# 🔔 مؤثرات حقيقية بلا موسيقى (مكتبة halal-sfx): "lib":[[ثانية, "whoosh" أو "whoosh-03", قوة؟]]
+#    القوة 1 = ذروة ‎-18 dBFS (القاعدة ١) · نقطة الربط من المكتبة: ذروة الووش/التوتر على الثانية، والباقي يبدأ عليها
+if _s.get("lib"):
+    import importlib.util as _iu
+    _sp=_iu.spec_from_file_location("sfx_lib",os.path.join(os.path.dirname(os.path.abspath(__file__)),"44_sfx_lib.py"))
+    _L=_iu.module_from_spec(_sp); _sp.loader.exec_module(_L)
+    for e in _s["lib"]:
+        x,anc,_m=_L.load(e[1]); add(x,e[0]-anc,0.126*(e[2] if len(e)>2 else 1.0))
 buf=np.clip(buf,-0.95,0.95)
 pcm=(buf*32767).astype('<i2')
 st=np.repeat(pcm[:,None],2,axis=1).ravel()

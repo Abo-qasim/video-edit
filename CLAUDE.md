@@ -4,6 +4,8 @@
 - `.claude/skills/` — بلقن **video-edit-halal**: `video-ad-editor` (المحرّك) · `montage-video` · `motion-video` · `podcast-video` · `thumbnail-video`.
 - `halal-audio/` — بلقن **halal-audio**: الخلفيات الحلال (أصوات بشرية بلا موسيقى، علو موحّد، `catalog.json`).
   `42_bg_audio.py` و`motion/audio.py` يلقونها وحدهم — لا تمرّر مسار.
+- `halal-sfx/` — بلقن **halal-sfx**: 37 مؤثر بلا موسيقى (`references/sfx-library.md`) — `44_sfx_lib.py` يلقاه وحده.
+  أصوات جديدة: فرز YAMNet (`~/.claude/models/yamnet-qualcomm` على جهازه) ← `43_sfx.py review` ← المقبول هني ← ارفع إصدار `halal-sfx`.
 
 ## بجلسة السحابة
 - **الأدوات:** hook البداية (`.claude/cloud-setup.sh`) ينزّل ffmpeg وnumpy/scipy. الباقي من الخطوة 0 بـ`references/start.md`.

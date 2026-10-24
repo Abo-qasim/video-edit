@@ -289,6 +289,7 @@ bash scripts/07_contact_sheet.sh <work> <work>/sheet.jpg 1.2 4.6 12.3 27.6 31.0 
 | «طبقات» للهوك: كلمة فوق الراس، ثنتين ورا الراس، الباقي قدّامه (ماك) | `references/cut-styles.md` |
 | مؤثرات على الإيقاع (قطع وزوم ورجّة على النبضة) | `references/beat-fx.md` |
 | خلفية صوتية جاهزة (مكتبة الخلفيات الحلال) | `references/bg-library.md` |
+| مؤثرات صوتية حقيقية بلا موسيقى (ووش، ميمز، شوك، كاميرا) | `references/sfx-library.md` |
 | حركات الكلمة، ستايلات الكابشن، الكشيدة | `references/word-fx.md` |
 | شرح كامل بلا وجه + إيقاع هادي | `references/explainer-and-pace.md` |
 | خلفية باهتة | `references/backdrop.md` |
@@ -324,6 +325,8 @@ python3 scripts/29_handtrack.py <work> <من> <إلى>
 { "outro": 5.2, "whoosh_up": [3.1,11.25], "whoosh_down": [7.85], "thud": [27.27,29.47], "tap": [23.08,24.06] }
 ```
 - `outro` = مدة كرت النهاية. ناقص = 0 (بلا كرت) — و`04_render_frames.js` يوقف بخطأ لو المدة طلعت مو رقم أو صفر (قبل 6.0 كان يطلّع «0 فريم» وينجح بصمت).
+- 🔔 **مؤثرات حقيقية بلا موسيقى** (ووش، bruh، شوك، كاميرا…): `"lib": [[7.85, "whoosh"], [12.4, "suspense-04"]]`
+  من مكتبة halal-sfx ← `references/sfx-library.md`
 
 ```bash
 python3 scripts/05_sfx.py <work>

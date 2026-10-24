@@ -14,6 +14,7 @@
 |---|---|---|
 | `.claude/skills/` | **video-edit-halal** — 5 سكلات: الريل، الموشن، البودكاست، المونتاج، الكفر + أدوات المكتبة | ~24 ميقا |
 | `halal-audio/` | **halal-audio** — 57 خلفية حلال بعلو موحّد ‎-16 LUFS + الفهرس | ~195 ميقا |
+| `halal-sfx/` | **halal-sfx** — 37 مؤثر بلا موسيقى (ووش، bruh، شوك، كاميرا…) — فرز YAMNet + مراجعتك بأذنك | ~1 ميقا |
 | `.claude-plugin/marketplace.json` | فهرس المتجر (يعرّف البلقنين) | — |
 | `.claude/settings.json` + `cloud-setup.sh` + `CLAUDE.md` | تجهيز جلسة السحابة وتعليماتها | — |
 
@@ -27,7 +28,7 @@
 2. **Add** ← **Add marketplace** ← اكتب: `Abo-qasim/video-edit-halal`
 3. يطلب **Connect GitHub** / **Install the Claude GitHub App** ← وافق واختر مستودع **video-edit-halal** بس.
 4. فعّل **Sync automatically**.
-5. أضف البلقنين: **Video edit (halal)** و **Halal background audio**.
+5. أضف البلقنات الثلاثة: **Video edit (halal)** و **Halal background audio** و **Halal sound effects**.
 6. **شيل القديم** عشان ما تتكرر السكلات: `video-edit` و`video-edit-previews` (تحت **My Uploads**) ← **Remove**.
 
 بعدها أي جهاز تسجّل فيه بنفس الحساب ينزّلهم لحاله عند أول جلسة (أو `/reload-plugins`).
@@ -62,6 +63,10 @@
 - **ملفات صوت جديدة:** على جهازك الرئيسي قل لكلود «ضيف ملفات الأصوات الجديدة للمكتبة وارفعها»
   (يبنيها بالمستودع، يرفع إصدار halal-audio، ويدفع — وحسابك يوزّعها). ⚠️ البلقن ~195 من 200 ميقا.
 
+## 🔔 المؤثرات
+- كلود يحطها بنفسه بلحظات لها معنى (ووش على القطع، شوك على المفاجأة…) — أو قل له «حط bruh هني».
+- أصوات جديدة؟ أرسلها له (ملف أو رابط): يفرزها بنموذج YAMNet (يشيل أي شي فيه موسيقى)، ويفتح لك صفحة «مقبول / مرفوض»، ويضيف المقبول.
+
 ## 🔄 التحديث
 
 أي تعديل يندفع للمستودع ← حسابك يسحبه (Sync automatically) ← كل الأجهزة. تبيه الحين؟ **Customize ← Plugins ← Check for updates**.
@@ -77,6 +82,9 @@ claude plugin install video-edit-halal@halal-video
 ```
 ```bash
 claude plugin install halal-audio@halal-video
+```
+```bash
+claude plugin install halal-sfx@halal-video
 ```
 
 تعديلاتنا فوق البلقن الأصلي موثّقة بـ`.claude/skills/LOCAL-CHANGES.md`.

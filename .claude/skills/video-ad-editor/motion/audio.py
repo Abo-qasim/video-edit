@@ -247,6 +247,12 @@ class SFX:
         return norm(reverb(y, 0.3, 0.1)[:n], 0.8), 0.0
 
     def make(self, kind, **k):
+        if kind.startswith('lib:'):                     # مؤثر حقيقي بلا موسيقى من مكتبة halal-sfx: 'lib:whoosh' أو 'lib:whoosh-03'
+            import importlib.util
+            sp = importlib.util.spec_from_file_location('sfx_lib', os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'scripts', '44_sfx_lib.py'))
+            L = importlib.util.module_from_spec(sp); sp.loader.exec_module(L)
+            x, anc, _ = L.load(kind[4:], sr=SR)
+            return st(x * 0.8, k.get('pan') or 0.0), anc     # نفس ذروة المؤثرات المركّبة (0.8)
         fn = getattr(self, kind.replace('-', '_'), None)
         if not fn: raise SystemExit(f'❌ نوع مؤثر مو معروف: {kind}')
         kk = {a: b for a, b in k.items() if a in ('dur', 'pitch', 'pan', 'cps') and b is not None}

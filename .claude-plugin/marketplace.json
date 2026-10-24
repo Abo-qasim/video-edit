@@ -1,6 +1,6 @@
 {
   "name": "halal-video",
-  "description": "Video edit (halal) — Arabic video editing with a halal background-audio library. One private repo for claude.ai, every machine, and cloud sessions.",
+  "description": "Video edit (halal) — Arabic video editing with a halal background-audio library and music-free sound effects. One private repo for claude.ai, every machine, and cloud sessions.",
   "owner": {
     "name": "Abo-qasim"
   },
@@ -8,12 +8,17 @@
     {
       "name": "video-edit-halal",
       "source": "./.claude/skills",
-      "description": "Arabic video editing — talking-head reels, 3D motion explainers, podcasts, beat-synced montage, covers & thumbnails, with tools for the halal background-audio library."
+      "description": "Arabic video editing — talking-head reels, 3D motion explainers, podcasts, beat-synced montage, covers & thumbnails, with tools for the halal audio and SFX libraries."
     },
     {
       "name": "halal-audio",
       "source": "./halal-audio",
       "description": "Companion to Video edit (halal): 57 halal background tracks (vocals only, no music), loudness-matched, with a catalog."
+    },
+    {
+      "name": "halal-sfx",
+      "source": "./halal-sfx",
+      "description": "Companion to Video edit (halal): 37 music-free YouTuber sound effects, screened by YAMNet and approved by ear."
     }
   ]
 }
