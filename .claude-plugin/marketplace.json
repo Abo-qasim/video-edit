@@ -1,0 +1,14 @@
+{
+  "name": "halal-video",
+  "description": "Video-Edit (Arabic video editing) with a halal background-audio library — one private repo for every machine and cloud sessions.",
+  "owner": {
+    "name": "Abo-qasim"
+  },
+  "plugins": [
+    {
+      "name": "Video-Edit",
+      "source": "./.claude/skills",
+      "description": "Arabic video editing — talking-head reels, 3D motion explainers, podcasts, beat-synced montage, covers & thumbnails, halal background-audio library."
+    }
+  ]
+}
