@@ -584,7 +584,7 @@ def do_sync(push=True):
             loc["tags"] = {t["id"]: {k: t.get(k) for k in USER} for t in merged["tracks"] if t.get("tagged_at")}
             write_json(TAGS, loc)
         n = len(loc["tags"])
-        return True, (f"تزامن ✓ — {n} ملف مصنّف" + (" · رفعت تصنيف هالجهاز" if pushed else ""))
+        return True, (f"تزامن ✓ — {n} ملف مصنّف" + (" · رفعت التحديث لقت هب" if pushed else " · كل شي محدّث"))
     except Exception as e:
         return False, f"ما قدرت أزامن: {e}"
     finally:
