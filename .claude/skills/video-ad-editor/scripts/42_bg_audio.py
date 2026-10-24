@@ -114,7 +114,7 @@ def read_json(p, default):
 
 def write_json(p, obj):
     tmp = p + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as f:
+    with open(tmp, "w", encoding="utf-8", newline="\n") as f:     # LF: بدونها ويندوز يكتب CRLF وgit يحسبه تعديل
         json.dump(obj, f, ensure_ascii=False, indent=1)
     os.replace(tmp, p)
 
