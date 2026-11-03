@@ -44,3 +44,13 @@
 3. حدّث `plugin.json` و`VERSION` (مثلاً `6.0.2-halal.1`) وحط `previews.zip`.
 4. استبدل `.claude/skills/` بالمستودع بالناتج، ثم commit + push.
 5. حسابك بـclaude.ai يسحبه لكل الأجهزة وحده (Sync automatically) — أو **Check for updates**.
+
+## حزمة المؤثرات المضحكة 101–119 (6.0.1-halal.6)
+| الملف | |
+|---|---|
+| `video-ad-editor/motion/moves.js` | آخره: `FX.stampSlam` `modeToggle` `heartEyes` `popPicture` `reactionPip` `calendarFlip` `blackoutGag` `zotTag` `routeTrace` `gaugeDrop` `ringCount` `compassSwing` `guestTag` `thanksRoll` `evolveTable` `fireLeak` `newsBar` `nameArrow` `underlineCaption` (101–119) + نسخ 16:9 `FX16.*` لـ#11 #65 #69 #71 #76 #97 (أقسام مفصولة بـ`═══ moves-extra.js` و`═══ moves-landscape.js`) |
+| `video-ad-editor/motion/moves/catalog.json` | أسطر 101–119، كلها `role: "accent"` (لهجات فقط، ما تصير أساسية) إلا 116 انتقال النار؛ cues جديدة: verdict mode love reaction food time route progress guest thanks compare3 alert |
+| `video-ad-editor/motion/moves/previews.zip` | + معاينات 101–119 (`previews/` طولي، `previews-landscape/` أفقي) |
+| `video-ad-editor/references/motion-effects.md` | جديد — الدليل: متى تنقترح، الخيارات، الأصوات المناسبة |
+| `video-ad-editor/scripts/48_tape_wind.py` | جديد — ترجيع/تقديم شريط بأصوات مسموعة |
+| `video-ad-editor/references/moves.md` · `scripts/35_moves.py` | سطر يدل على الدليل + cues الجديدة بسطر الاستخدام |

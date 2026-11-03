@@ -202,3 +202,8 @@ function dive(t, tc, px, py) { if (t < tc - 0.38 || t > tc + 0.36) return;
 2. سطر بالكتالوج **برقم جديد بالآخر**. ⛔ لا تعيد ترقيم القديم: الناس حافظين أرقام.
 3. معاينة 4 ث بنص الدقة: `previews/NN.mp4`، مرسومة من الدالة نفسها، مو من كود ثاني.
 4. المصدر بـ`CREDITS.md`، رابط فتحته بنفسك.
+
+## 3ز) الدفعة 101–119 — مؤثرات مضحكة وأدوات معلومة
+
+الدليل الكامل: `references/motion-effects.md` (ختم · سويتش تغيير النمط · إيموجي · صورة تقفز · رياكشن · تقويم · عتمة · لافتة · طريق · مقياس · حلقة · بوصلة · ضيف · شكر · جدول · نار · تنبيه · اسم · خط).
+`FX.stampSlam` `FX.modeToggle` `FX.heartEyes` … بـ`motion/moves-extra.js`، ونسخ 16:9 بـ`FX16.*` (`motion/moves-landscape.js`). تنقترح بـ`plan --cues verdict,reaction,time,mode,love,food,route,progress,guest,thanks,compare3,alert`.

@@ -1,6 +1,6 @@
 {
  "version": 1,
- "note": "الأرقام ثابتة — لا تعيد ترقيمها (اختيارات الناس محفوظة بالـid). FX.<id> بـmotion/moves.js؛ cat=rule = قاعدة توقيت مو دالة رسم (إلا ramp). role: caption/text/transition/camera/card/rule · energy 1-3 · families = لون الحركة للفيديو · cues = لحظات تستاهل حركة لهجة (accent). mask: required (تحتاج قصّ الشخص — mac: true، والبديل بلا قصّ كرت فيديو) | optional (أحلى بالقصّ وتشتغل بلاه). fallback = شنو يطلع بلا قصّ (من 62). face: optional = تستخدم تتبع الوجه (face.js من 36_facetrack.py — ماك) وبلاه مكان افتراضي (من 85). hand: optional = تستخدم تتبع الكف (palm.js من 29_handtrack.py — ماك) وبلاه مكان ثابت (91). manual: true = ما تنختار باللوحة أبداً، تنستخدم بس لما محتواها موجود (74 الآية — نص قرآن من مصدر موثوق).",
+ "note": "الأرقام ثابتة — لا تعيد ترقيمها (اختيارات الناس محفوظة بالـid). FX.<id> بـmotion/moves.js؛ cat=rule = قاعدة توقيت مو دالة رسم (إلا ramp). role: caption/text/transition/camera/card/rule · energy 1-3 · families = لون الحركة للفيديو · cues = لحظات تستاهل حركة لهجة (accent). mask: required (تحتاج قصّ الشخص — mac: true، والبديل بلا قصّ كرت فيديو) | optional (أحلى بالقصّ وتشتغل بلاه). fallback = شنو يطلع بلا قصّ (من 62). face: optional = تستخدم تتبع الوجه (face.js من 36_facetrack.py — ماك) وبلاه مكان افتراضي (من 85). hand: optional = تستخدم تتبع الكف (palm.js من 29_handtrack.py — ماك) وبلاه مكان ثابت (91). manual: true = ما تنختار باللوحة أبداً، تنستخدم بس لما محتواها موجود (74 الآية — نص قرآن من مصدر موثوق). · 101–119: حزمة المؤثرات المضحكة (motion-effects.md) — cues جديدة: verdict mode love reaction food time route progress guest thanks compare3 alert. role='accent' = لهجة فقط (ما تصير أساسية).",
  "moves": [
   {
    "n": 1,
@@ -2308,6 +2308,464 @@
    "bonus": false,
    "mask": "optional",
    "fallback": "الصدى على الفيديو كامل (بلا قصّ)"
+  },
+  {
+   "n": 101,
+   "id": "stampSlam",
+   "name": "ختم يضرب",
+   "sub": "ختم مطّاط بخبطة",
+   "cat": "card",
+   "role": "accent",
+   "energy": 3,
+   "families": [
+    "punch",
+    "editorial"
+   ],
+   "cues": [
+    "verdict",
+    "hit",
+    "contrast"
+   ],
+   "desc": "ختم مطّاط بنص من عندك (معتمد · مرفوض · تم · ممنوع) ينزل على اللقطة: تكبير ثم ارتداد، اللقطة ترتجّ، حلقة غبار، وحبر متآكل. الصوت hit-03 على s+0.12.",
+   "source": {
+    "label": "مشروع «كشتة بدون كشتة» (3 كشتات) — مكتوبة من جديد بمحرّك البلقن",
+    "url": ""
+   },
+   "preview": "previews/101.mp4",
+   "bonus": false
+  },
+  {
+   "n": 102,
+   "id": "modeToggle",
+   "name": "سويتش تغيير النمط",
+   "sub": "OFF ثم ON",
+   "cat": "card",
+   "role": "accent",
+   "energy": 2,
+   "families": [
+    "punch",
+    "editorial"
+   ],
+   "cues": [
+    "mode",
+    "reveal"
+   ],
+   "desc": "بطاقة iOS تنزل من فوق وسويتش OFF ينقلب ON بخضرة ونبضة ولمعة دافية. لأي تغيير نمط أو وضع تبي تبرزه؛ النص label من عندك.",
+   "source": {
+    "label": "مشروع «كشتة بدون كشتة» (3 كشتات) — مكتوبة من جديد بمحرّك البلقن",
+    "url": ""
+   },
+   "preview": "previews/102.mp4",
+   "bonus": false
+  },
+  {
+   "n": 103,
+   "id": "heartEyes",
+   "name": "إيموجي يحب",
+   "sub": "😍 مرسوم بقلوب",
+   "cat": "card",
+   "role": "accent",
+   "energy": 2,
+   "families": [
+    "punch",
+    "calm"
+   ],
+   "cues": [
+    "love",
+    "reaction"
+   ],
+   "desc": "وجه 😍 مرسوم (مو صورة) يقفز بارتداد، قلوب تنبض بعيونه وقلوب صغيرة تطير. للهدية، للأكل، للإعجاب. الصوت voice-06.",
+   "source": {
+    "label": "مشروع «كشتة بدون كشتة» (3 كشتات) — مكتوبة من جديد بمحرّك البلقن",
+    "url": ""
+   },
+   "preview": "previews/103.mp4",
+   "bonus": false
+  },
+  {
+   "n": 104,
+   "id": "popPicture",
+   "name": "صورة تقفز",
+   "sub": "إطار أبيض مائل",
+   "cat": "card",
+   "role": "accent",
+   "energy": 2,
+   "families": [
+    "punch",
+    "editorial",
+    "calm"
+   ],
+   "cues": [
+    "food",
+    "reveal",
+    "emphasis"
+   ],
+   "desc": "إطار أبيض مائل يقفز على الجنب بأي صورة (ساندويش، منتج، ميم) وتعليق تحتها. fromX = ينزلق من الجنب بدل التكبير.",
+   "source": {
+    "label": "مشروع «كشتة بدون كشتة» (3 كشتات) — مكتوبة من جديد بمحرّك البلقن",
+    "url": ""
+   },
+   "preview": "previews/104.mp4",
+   "bonus": false
+  },
+  {
+   "n": 105,
+   "id": "reactionPip",
+   "name": "رياكشن على الجنب",
+   "sub": "تجميد + فيديو مائل",
+   "cat": "card",
+   "role": "accent",
+   "energy": 3,
+   "families": [
+    "punch"
+   ],
+   "cues": [
+    "reaction",
+    "hit"
+   ],
+   "desc": "الصورة تتجمّد وتغمّق بخفة وفيديو رد فعل (ضحكة، صدمة، حزن — أي مقطع) يطلع مائل على الجنب ويشتغل. أي مصدر إطارات عبر o.draw.",
+   "source": {
+    "label": "مشروع «كشتة بدون كشتة» (3 كشتات) — مكتوبة من جديد بمحرّك البلقن",
+    "url": ""
+   },
+   "preview": "previews/105.mp4",
+   "bonus": false
+  },
+  {
+   "n": 106,
+   "id": "calendarFlip",
+   "name": "تقويم يقلب",
+   "sub": "ورق فليب شهر شهر",
+   "cat": "card",
+   "role": "accent",
+   "energy": 2,
+   "families": [
+    "editorial",
+    "punch"
+   ],
+   "cues": [
+    "time",
+    "contrast"
+   ],
+   "desc": "رزنامة تقلب صفحاتها شهر شهر (ورق فليب) من تاريخ لتاريخ وتدور دائرة حمرا حول اليوم. لأي «مرّ وقت». ترجع عدد القلبات للعدّاد.",
+   "source": {
+    "label": "مشروع «كشتة بدون كشتة» (3 كشتات) — مكتوبة من جديد بمحرّك البلقن",
+    "url": ""
+   },
+   "preview": "previews/106.mp4",
+   "bonus": false
+  },
+  {
+   "n": 107,
+   "id": "blackoutGag",
+   "name": "شاشة تنطفي",
+   "sub": "نكتة العتمة",
+   "cat": "card",
+   "role": "accent",
+   "energy": 2,
+   "families": [
+    "punch"
+   ],
+   "cues": [
+    "reaction",
+    "hit"
+   ],
+   "desc": "الشاشة تعتّم تقريباً لثانية مع جملة بالنص ونبضة ضوء خفيفة (نفَس، صمت محرج، «بلا تعليق»). خفّض أصوات الباقين بالمكساج.",
+   "source": {
+    "label": "مشروع «كشتة بدون كشتة» (3 كشتات) — مكتوبة من جديد بمحرّك البلقن",
+    "url": ""
+   },
+   "preview": "previews/107.mp4",
+   "bonus": false
+  },
+  {
+   "n": 108,
+   "id": "zotTag",
+   "name": "لافتة تلطش",
+   "sub": "صفراء بإطار أبيض",
+   "cat": "card",
+   "role": "accent",
+   "energy": 3,
+   "families": [
+    "punch"
+   ],
+   "cues": [
+    "hit",
+    "reaction"
+   ],
+   "desc": "لافتة صفراء بإطار أبيض تلطش بالضربة وتهتز وتروح، مع خطوط انفجار. أي كلمة قصيرة من عندك. الصوت hit-03.",
+   "source": {
+    "label": "مشروع «كشتة بدون كشتة» (3 كشتات) — مكتوبة من جديد بمحرّك البلقن",
+    "url": ""
+   },
+   "preview": "previews/108.mp4",
+   "bonus": false
+  },
+  {
+   "n": 109,
+   "id": "routeTrace",
+   "name": "خط الطريق",
+   "sub": "خط منقّط + عدّاد",
+   "cat": "card",
+   "role": "accent",
+   "energy": 2,
+   "families": [
+    "onetake",
+    "editorial"
+   ],
+   "cues": [
+    "route",
+    "number"
+   ],
+   "desc": "خط منقّط يرسم نفسه ونقطة سيارة تمشي عليه وعدّاد (دقيقة/كم) يعدّ للوجهة. فوق لقطة الطريق.",
+   "source": {
+    "label": "مشروع «كشتة بدون كشتة» (3 كشتات) — مكتوبة من جديد بمحرّك البلقن",
+    "url": ""
+   },
+   "preview": "previews/109.mp4",
+   "bonus": false
+  },
+  {
+   "n": 110,
+   "id": "gaugeDrop",
+   "name": "مقياس ينزل",
+   "sub": "عدّاد بإبرة",
+   "cat": "card",
+   "role": "accent",
+   "energy": 2,
+   "families": [
+    "editorial",
+    "punch"
+   ],
+   "cues": [
+    "number",
+    "progress"
+   ],
+   "desc": "عدّاد نصف دائري بثلاث ألوان وإبرة تنزل من رقم لرقم (ضغط، بنزين، بطارية، صبر).",
+   "source": {
+    "label": "مشروع «كشتة بدون كشتة» (3 كشتات) — مكتوبة من جديد بمحرّك البلقن",
+    "url": ""
+   },
+   "preview": "previews/110.mp4",
+   "bonus": false
+  },
+  {
+   "n": 111,
+   "id": "ringCount",
+   "name": "حلقة تفرغ",
+   "sub": "نسبة تنزل لصفر",
+   "cat": "card",
+   "role": "accent",
+   "energy": 2,
+   "families": [
+    "editorial",
+    "punch",
+    "calm"
+   ],
+   "cues": [
+    "progress",
+    "number"
+   ],
+   "desc": "حلقة تفرغ من 100% لـ0% وتتلوّن أصفر ← برتقالي ← أحمر (أكل، شحن، صبر). غير #49 اللي تمتلي.",
+   "source": {
+    "label": "مشروع «كشتة بدون كشتة» (3 كشتات) — مكتوبة من جديد بمحرّك البلقن",
+    "url": ""
+   },
+   "preview": "previews/111.mp4",
+   "bonus": false
+  },
+  {
+   "n": 112,
+   "id": "compassSwing",
+   "name": "بوصلة",
+   "sub": "تتأرجح وتستقر",
+   "cat": "card",
+   "role": "accent",
+   "energy": 2,
+   "families": [
+    "editorial",
+    "onetake"
+   ],
+   "cues": [
+    "reveal",
+    "tech"
+   ],
+   "desc": "قرص ومؤشر يتأرجح ويستقر على الدرجة (اتجاه، «وين نروح؟»).",
+   "source": {
+    "label": "مشروع «كشتة بدون كشتة» (3 كشتات) — مكتوبة من جديد بمحرّك البلقن",
+    "url": ""
+   },
+   "preview": "previews/112.mp4",
+   "bonus": false
+  },
+  {
+   "n": 113,
+   "id": "guestTag",
+   "name": "شريط ضيف",
+   "sub": "شارة حمرا وثائقية",
+   "cat": "card",
+   "role": "accent",
+   "energy": 1,
+   "families": [
+    "calm",
+    "onetake",
+    "editorial"
+   ],
+   "cues": [
+    "guest",
+    "reveal"
+   ],
+   "desc": "شريط وثائقي تحت اليمين: شارة + اسم كبير + سطر صغير. لضيف، مفاجأة، شخص جديد، حيوان.",
+   "source": {
+    "label": "مشروع «كشتة بدون كشتة» (3 كشتات) — مكتوبة من جديد بمحرّك البلقن",
+    "url": ""
+   },
+   "preview": "previews/113.mp4",
+   "bonus": false
+  },
+  {
+   "n": 114,
+   "id": "thanksRoll",
+   "name": "قائمة شكر",
+   "sub": "صفوف على الكلمات",
+   "cat": "card",
+   "role": "accent",
+   "energy": 1,
+   "families": [
+    "calm",
+    "editorial"
+   ],
+   "cues": [
+    "thanks",
+    "list"
+   ],
+   "desc": "لوحة «شكرًا لـ» وصفوف (دور ← اسم ← تعريف) كل صف يهبط على الكلمة اللي تنقال. ثبّته على وقت الكلمة من التفريغ.",
+   "source": {
+    "label": "مشروع «كشتة بدون كشتة» (3 كشتات) — مكتوبة من جديد بمحرّك البلقن",
+    "url": ""
+   },
+   "preview": "previews/114.mp4",
+   "bonus": false
+  },
+  {
+   "n": 115,
+   "id": "evolveTable",
+   "name": "جدول تطوّر",
+   "sub": "مراحل جنب بعض",
+   "cat": "card",
+   "role": "accent",
+   "energy": 2,
+   "families": [
+    "editorial"
+   ],
+   "cues": [
+    "compare3",
+    "contrast",
+    "list"
+   ],
+   "desc": "جدول 2–3 مراحل تهبط صفوفه وحدة وحدة والخلية الأخيرة تتضوّى وختم اختياري بالآخر. يحتاج خلفية غامقة.",
+   "source": {
+    "label": "مشروع «كشتة بدون كشتة» (3 كشتات) — مكتوبة من جديد بمحرّك البلقن",
+    "url": ""
+   },
+   "preview": "previews/115.mp4",
+   "bonus": false,
+   "landscape": "first"
+  },
+  {
+   "n": 116,
+   "id": "fireLeak",
+   "name": "انتقال نار",
+   "sub": "تسريب برتقالي + جمر",
+   "cat": "transition",
+   "role": "transition",
+   "energy": 3,
+   "families": [
+    "punch",
+    "onetake"
+   ],
+   "cues": [
+    "reveal"
+   ],
+   "desc": "تسريب ضوء برتقالي يكسح من لقطة للثانية وجمر يطلع من تحت. من الغروب لليل، ومن الهدوء للحماس. الصوت whoosh-05.",
+   "source": {
+    "label": "مشروع «كشتة بدون كشتة» (3 كشتات) — مكتوبة من جديد بمحرّك البلقن",
+    "url": ""
+   },
+   "preview": "previews/116.mp4",
+   "bonus": false
+  },
+  {
+   "n": 117,
+   "id": "newsBar",
+   "name": "شريط تنبيه",
+   "sub": "تنبيه / عاجل",
+   "cat": "card",
+   "role": "accent",
+   "energy": 2,
+   "families": [
+    "punch",
+    "editorial"
+   ],
+   "cues": [
+    "alert",
+    "emphasis"
+   ],
+   "desc": "شريط أحمر بالعرض ينزلق من اليمين بشارة بيضا (تنبيه / عاجل) وجملة من عندك. الصوت ui-04.",
+   "source": {
+    "label": "مشروع «كشتة بدون كشتة» (3 كشتات) — مكتوبة من جديد بمحرّك البلقن",
+    "url": ""
+   },
+   "preview": "previews/117.mp4",
+   "bonus": false
+  },
+  {
+   "n": 118,
+   "id": "nameArrow",
+   "name": "سهم اسم",
+   "sub": "بطاقة اسم وسهم",
+   "cat": "card",
+   "role": "accent",
+   "energy": 1,
+   "families": [
+    "editorial",
+    "onetake",
+    "calm"
+   ],
+   "cues": [
+    "guest"
+   ],
+   "desc": "بطاقة اسم (ودور) فوق الرأس وسهم ينزل عليه، ويتتبع نقطة متحركة بـkeys. أول ظهور بس. الصوت ui-02.",
+   "source": {
+    "label": "مشروع «كشتة بدون كشتة» (3 كشتات) — مكتوبة من جديد بمحرّك البلقن",
+    "url": ""
+   },
+   "preview": "previews/118.mp4",
+   "bonus": false
+  },
+  {
+   "n": 119,
+   "id": "underlineCaption",
+   "name": "كابشن بخط",
+   "sub": "كلمة مخطوطة",
+   "cat": "text",
+   "role": "accent",
+   "energy": 1,
+   "families": [
+    "calm",
+    "editorial",
+    "punch"
+   ],
+   "cues": [
+    "emphasis"
+   ],
+   "desc": "كابشن عادي وكلمة وحدة مخطوط تحتها بلون ذهبي — الكلمة اللي تبي تعلّق عليها («الأمير» «غدا»).",
+   "source": {
+    "label": "مشروع «كشتة بدون كشتة» (3 كشتات) — مكتوبة من جديد بمحرّك البلقن",
+    "url": ""
+   },
+   "preview": "previews/119.mp4",
+   "bonus": false
   }
  ],
  "families": {

@@ -11,7 +11,7 @@
   python3 scripts/35_moves.py set "3 7 12" [--off "5"]
       يحفظ اختياراً من الشات مباشرة (أرقام المعرض) — لما يرد المستخدم «أبي 3 و7، 5 لا» بدل الصفحة.
   python3 scripts/35_moves.py list             يطبع الكتالوج (رقم · id · الاسم · الحالة)
-  python3 scripts/35_moves.py plan --title "عنوان الفيديو" [--family calm|punch|onetake|editorial|auto] [--cues number,list,price,cta,contrast,emphasis,reveal,tech,hit] [--dry]
+  python3 scripts/35_moves.py plan --title "عنوان الفيديو" [--family calm|punch|onetake|editorial|auto] [--cues number,list,price,cta,contrast,emphasis,reveal,tech,hit,verdict,mode,love,reaction,food,time,route,progress,guest,thanks,compare3,alert] [--dry]
       لوحة حركات الفيديو: 3 حركات أساسية (كلمات + انتقال + كاميرا/كرت) من عائلة وحدة يدور حولها الفيديو كله،
       + لهجات (accents) للحظات الخاصة حسب cues، + القواعد اللي تمشي دايماً. يتجنب أساسيات آخر 3 فيديوهات و"off".
       ينحفظ بسجل moves-history.json (إلا مع --dry) عشان الفيديو الجاي يطلع غير.

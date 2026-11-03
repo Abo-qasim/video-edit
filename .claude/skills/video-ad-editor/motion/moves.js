@@ -2243,3 +2243,467 @@
 
   G.FX = FX;
 })();
+
+/* ═══ moves-extra.js — حركات مضحكة وجاهزة (101–119) من مشروع مونتاج رحلات ═══
+   نفس شكل moves.js: FX.<id>(ctx, t, o) ترسم على ctx.X. ما عليها فيديو: ارسم لقطتك أول، وناد الحركة فوقها.
+   (stampSlam و reactionPip و blackoutGag ياخذون o.video إذا تبي الحركة نفسها تهزّ/تعتّم اللقطة.)
+   • المقاس: تشتغل على أي لوحة (1080×1920 أو 1920×1080). الأحجام تتبع u = min(W,H)/1080 والمواقع نسبة من W وH.
+   • o.s = لحظة الحركة (ثبّتها على كلمة حقيقية: ctx.wordTime('l2', 0).s) · o.out = لحظة الخروج (اختياري).
+   • الألوان من ctx.P إلا الختم/السويتش/الرزنامة (ألوان معنى: أخضر iOS، ورقة التقويم) — وكلها بخيار color.
+   • التحميل: بعد moves.js مباشرة (<script src="./moves-extra.js">) أو ادمجها بـscripts/47_add_extra_moves.py.
+   الدليل: references/motion-effects.md · الكتالوج: motion/moves/catalog.additions.json */
+(function () {
+  const G = typeof window !== 'undefined' ? window : globalThis;
+  const FX = G.FX = G.FX || {};
+  const cl = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+  const pr = (t, a, b) => cl((t - a) / (b - a));
+  const lerp = (a, b, k) => a + (b - a) * k;
+  const mix = (c0, c1, k) => c0.map((v, i) => Math.round(lerp(v, c1[i], k)));
+  const pick = (o, k, d) => (o[k] === undefined ? d : o[k]);
+  const U = ctx => Math.min(ctx.W, ctx.H) / 1080;
+  const heart = (X, cx, cy, s) => {
+    X.beginPath(); X.moveTo(cx, cy + s * 0.95);
+    X.bezierCurveTo(cx - s * 1.35, cy + s * 0.1, cx - s * 0.95, cy - s * 0.95, cx, cy - s * 0.38);
+    X.bezierCurveTo(cx + s * 0.95, cy - s * 0.95, cx + s * 1.35, cy + s * 0.1, cx, cy + s * 0.95); X.closePath();
+  };
+  const scratch = {};                                                     // كانفس مؤقت لكل حركة (للختم)
+  const cv = (k, w, h) => { const c = scratch[k] || (scratch[k] = document.createElement('canvas')); c.width = w; c.height = h; return c; };
+
+  /* ── أ) مؤثرات ضحك ────────────────────────────────────────────── */
+
+  /* 101 ختم يضرب — ختم مطّاط ينزل على اللقطة بخبطة: تكبير ثم ارتداد، اللقطة ترتجّ، حلقة غبار، حبر متآكل.
+     النص من عندك (معتمد · مرفوض · تم · ممنوع …) — الحركة هي المقصودة مو الكلمة. الصوت: hit-03 (lib) على o.s+0.12.
+     o: {s, text, sub?, x=W/2, y=H*.6, rot=-.13, color=P.acc, size=170, w=900, h=340, out?, video?(Y)} */
+  FX.stampSlam = (ctx, t, o) => {
+    const { X, P, at } = ctx, u = U(ctx), w = (o.w || 900) * u, h = (o.h || 340) * u, col = o.color || P.acc, rot = pick(o, 'rot', -0.13);
+    const ti = o.s + 0.12, dt = t - ti, sh = dt >= 0 && dt < 0.45 ? 16 * u * Math.exp(-dt * 11) : 0;
+    if (o.video) { X.save(); X.translate(sh * Math.sin(dt * 70), sh * 0.6 * Math.cos(dt * 83)); o.video(X); X.restore(); }
+    if (t < o.s) return;
+    const ko = o.out != null ? 1 - at(t, o.out, o.out + 0.3) : 1; if (ko <= 0.01) return;
+    const kd = pr(t, o.s, o.s + 0.12), d2 = Math.max(0, t - ti), z = kd < 1 ? lerp(2.7, 1, kd * kd * kd) : 1 + 0.08 * Math.exp(-d2 * 13) * Math.cos(d2 * 30);
+    const c = cv('stamp', Math.ceil(w + 60), Math.ceil(h + 60)), Y = c.getContext('2d'); Y.clearRect(0, 0, c.width, c.height);
+    Y.save(); Y.translate(c.width / 2, c.height / 2); Y.strokeStyle = col; Y.lineJoin = 'round';
+    Y.lineWidth = 13 * u; Y.beginPath(); Y.roundRect(-w / 2, -h / 2, w, h, 30 * u); Y.stroke();
+    Y.lineWidth = 5 * u; Y.beginPath(); Y.roundRect(-w / 2 + 22 * u, -h / 2 + 22 * u, w - 44 * u, h - 44 * u, 18 * u); Y.stroke();
+    const size = (o.size || 170) * u;
+    ctx.text(Y, o.text, 0, o.sub ? size * 0.34 + 22 * u : size * 0.34, { family: 'display', weight: 700, size, color: col, maxWidth: w - 120 * u });
+    if (o.sub) ctx.text(Y, o.sub, 0, -h / 2 + 100 * u, { family: 'body', weight: 700, size: 66 * u, color: col, maxWidth: w - 120 * u });
+    Y.restore(); Y.globalCompositeOperation = 'destination-out';                 // حبر متآكل: نقاط وخدوش
+    for (let i = 0; i < 900; i++) { Y.globalAlpha = 0.25 + 0.5 * ctx.hash01(i, 4, 9); Y.beginPath(); Y.arc(ctx.hash01(i, 1, 9) * c.width, ctx.hash01(i, 2, 9) * c.height, (0.8 + ctx.hash01(i, 3, 9) * 3.2) * u, 0, 6.2832); Y.fill(); }
+    Y.globalAlpha = 0.55; Y.lineWidth = 3; for (let i = 0; i < 7; i++) { const x0 = ctx.hash01(i, 5, 9) * c.width, y0 = ctx.hash01(i, 6, 9) * c.height; Y.beginPath(); Y.moveTo(x0, y0); Y.lineTo(x0 + 120 * (ctx.hash01(i, 7, 9) - 0.5), y0 + 40 * (ctx.hash01(i, 8, 9) - 0.5)); Y.stroke(); }
+    const x = pick(o, 'x', ctx.W / 2), y = pick(o, 'y', ctx.H * 0.6);
+    X.save(); X.translate(x, y); X.rotate(rot); X.scale(z, z); X.globalAlpha = Math.min(1, kd * 3) * ko * 0.93;
+    X.shadowColor = 'rgba(0,0,0,.35)'; X.shadowBlur = 18; X.shadowOffsetY = 8; X.drawImage(c, -c.width / 2, -c.height / 2); X.restore();
+    if (d2 > 0 && d2 < 0.5) { const b = at(t, ti, ti + 0.43, 'expoOut'), fb = 1 - b; X.save(); X.globalAlpha = 0.5 * fb; X.strokeStyle = '#fff'; X.lineWidth = 12 * u * fb + 2;
+      X.beginPath(); X.ellipse(x, y, w * 0.45 + 380 * u * b, h * 0.45 + 160 * u * b, rot, 0, 6.2832); X.stroke(); X.restore(); }
+  };
+
+  /* 102 سويتش تغيير النمط — بطاقة iOS تنزل من فوق: سويتش OFF ثم ينقلب ON بخضرة ونبضة ولمعة. لأي «تغيير نمط/وضع» تبي تبرزه؛ النص label من عندك (الافتراضي «تغيير النمط»).
+     الصوت: ui-02 (نقرة) عند o.s، وgame-02 أو ui-03 عند o.on. o: {s, on=s+.7, out?, label='تغيير النمط', x=W/2}  */
+  FX.modeToggle = (ctx, t, o) => {
+    const { X, at } = ctx, u = U(ctx); if (t < o.s) return;
+    const on0 = pick(o, 'on', o.s + 0.7), ki = at(t, o.s, o.s + 0.45, 'backOut'), ko = o.out != null ? at(t, o.out, o.out + 0.35, 'cubicIn') : 0; if (ko >= 1) return;
+    const kon = at(t, on0, on0 + 0.3, 'expoOut'), kb = pr(t, on0, on0 + 0.32);
+    const cw = Math.min(900 * u, ctx.W * 0.9), ch = 210 * u, cx = pick(o, 'x', ctx.W / 2), cy = 40 * u + ch / 2 - (1 - ki) * 330 * u - ko * 330 * u;
+    X.save(); X.translate(cx, cy);
+    X.shadowColor = 'rgba(0,0,0,.45)'; X.shadowBlur = 40; X.shadowOffsetY = 16; X.fillStyle = 'rgba(248,248,250,.97)'; X.beginPath(); X.roundRect(-cw / 2, -ch / 2, cw, ch, 56 * u); X.fill(); X.shadowColor = 'transparent';
+    ctx.text(X, pick(o, 'label', 'تغيير النمط'), cw / 2 - 56 * u, 24 * u, { family: 'display', weight: 700, size: 76 * u, color: '#1c1c1e', align: 'right', maxWidth: cw - 330 * u });
+    const tw = 230 * u, th = 128 * u, tx = -cw / 2 + 56 * u + tw / 2, rgb = mix([209, 209, 214], [52, 199, 89], kon);
+    X.fillStyle = `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`; X.beginPath(); X.roundRect(tx - tw / 2, -th / 2, tw, th, th / 2); X.fill();
+    ctx.text(X, kon > 0.5 ? 'ON' : 'OFF', tx + (kon > 0.5 ? -58 : 58) * u, 15 * u, { family: 'num', weight: 800, size: 40 * u, color: kon > 0.5 ? 'rgba(255,255,255,.92)' : '#a1a1a6', dir: 'ltr' });
+    const kx = lerp(tx - tw / 2 + th / 2, tx + tw / 2 - th / 2, kon) + (kb < 1 ? 8 * u * Math.sin(kb * Math.PI) : 0), sq = 1 + 0.18 * Math.sin(kb * Math.PI);
+    X.shadowColor = 'rgba(0,0,0,.3)'; X.shadowBlur = 14; X.shadowOffsetY = 6; X.fillStyle = '#fff'; X.beginPath(); X.ellipse(kx, 0, (th / 2 - 8 * u) * sq, th / 2 - 8 * u, 0, 0, 6.2832); X.fill();
+    X.restore();
+    if (t > on0 && t < on0 + 0.7) { const b = at(t, on0, on0 + 0.7, 'expoOut'); X.save(); X.globalAlpha = 0.6 * (1 - b); X.strokeStyle = '#34c759'; X.lineWidth = 14 * u;
+      X.beginPath(); X.roundRect(cx - cw / 2 - 30 * u * b, cy - ch / 2 - 30 * u * b, cw + 60 * u * b, ch + 60 * u * b, (56 + 30 * b) * u); X.stroke(); X.restore(); }
+    if (o.glow !== false) { const kg = at(t, on0, on0 + 0.12) * (1 - at(t, on0 + 0.12, on0 + 0.9)); if (kg > 0.01) { const g = X.createRadialGradient(cx, 140 * u, 40, cx, 140 * u, 900 * u);
+      g.addColorStop(0, 'rgba(255,214,102,' + 0.5 * kg + ')'); g.addColorStop(1, 'rgba(255,214,102,0)'); X.fillStyle = g; X.fillRect(0, 0, ctx.W, ctx.H); } }
+  };
+
+  /* 103 إيموجي يحب 😍 — وجه مرسوم (مو صورة) يقفز بارتداد، قلوب تنبض بعيونه وقلوب صغيرة تطير. لأي لحظة إعجاب. الصوت: voice-06 («آآآو»).
+     o: {s, out?, x=W*.82, y=H*.3, size=330} */
+  FX.heartEyes = (ctx, t, o) => {
+    const { X, at } = ctx, u = U(ctx); if (t < o.s) return;
+    const lt = t - o.s, ki = at(t, o.s, o.s + 0.4, 'backOut'), ko = o.out != null ? at(t, o.out, o.out + 0.3, 'cubicIn') : 0; if (ko >= 1) return;
+    const x = pick(o, 'x', ctx.W * 0.82), y = pick(o, 'y', ctx.H * 0.3), R = (o.size || 330) * u / 2, wob = 0.1 * Math.sin(lt * 7) * Math.exp(-lt * 0.6), beat = 1 + 0.14 * Math.pow(Math.max(0, Math.sin(lt * 9)), 3);
+    for (let i = 0; i < 9; i++) { const ph = (lt * 0.9 + i * 0.37) % 1.5, a = (1 - ph / 1.5) * (1 - ko) * pr(lt, 0.15, 0.5); if (a <= 0) continue;
+      X.save(); X.globalAlpha = a; X.fillStyle = ['#ff3b6b', '#ff7aa2', '#ff2d55'][i % 3]; heart(X, x + (ctx.hash01(i, 1, 4) - 0.5) * R * 3 + 30 * u * Math.sin(ph * 5 + i), y - R * 0.6 - ph * R * 2.4, (10 + 12 * ctx.hash01(i, 2, 4)) * u); X.fill(); X.restore(); }
+    X.save(); X.translate(x, y); X.rotate(wob); X.scale(ki * (1 - ko), ki * (1 - ko)); X.shadowColor = 'rgba(0,0,0,.35)'; X.shadowBlur = 30; X.shadowOffsetY = 14;
+    const g = X.createRadialGradient(-R * 0.25, -R * 0.3, R * 0.1, 0, 0, R); g.addColorStop(0, '#ffe98a'); g.addColorStop(0.7, '#ffc21f'); g.addColorStop(1, '#f0a000');
+    X.fillStyle = g; X.beginPath(); X.arc(0, 0, R, 0, 6.2832); X.fill(); X.shadowColor = 'transparent';
+    X.fillStyle = 'rgba(255,110,110,.45)'; X.beginPath(); X.ellipse(-R * 0.62, R * 0.2, R * 0.17, R * 0.1, 0, 0, 6.2832); X.ellipse(R * 0.62, R * 0.2, R * 0.17, R * 0.1, 0, 0, 6.2832); X.fill();
+    for (const sx of [-1, 1]) { X.save(); X.translate(sx * R * 0.38, -R * 0.14); X.scale(beat, beat); X.fillStyle = '#ff2d55'; heart(X, 0, 0, R * 0.27); X.fill();
+      X.fillStyle = 'rgba(255,255,255,.55)'; X.beginPath(); X.ellipse(-R * 0.1, -R * 0.12, R * 0.05, R * 0.08, 0.6, 0, 6.2832); X.fill(); X.restore(); }
+    X.fillStyle = '#5b2a0c'; X.beginPath(); X.moveTo(-R * 0.48, R * 0.3); X.quadraticCurveTo(0, R * 0.95, R * 0.48, R * 0.3); X.quadraticCurveTo(0, R * 0.42, -R * 0.48, R * 0.3); X.fill();
+    X.fillStyle = '#ff7a8a'; X.beginPath(); X.ellipse(0, R * 0.62, R * 0.2, R * 0.1, 0, 0, 6.2832); X.fill(); X.restore();
+  };
+
+  /* 104 صورة تقفز — إطار أبيض مائل يقفز على الجنب بأي صورة: أكل، منتج، ميم، لقطة. o.draw تدخل الصورة (أي رسم).
+     الصوت: whoosh-08 ثم ui-03. o: {s, out?, x, y, w=430, h=430, rot=-.09, tag?, fromX?, draw(Y,w,h)} — fromX = ينزلق من الجنب بدل التكبير */
+  FX.popPicture = (ctx, t, o) => {
+    const { X, at } = ctx, u = U(ctx); if (t < o.s) return;
+    const ki = at(t, o.s, o.s + 0.45, 'backOut'), ko = o.out != null ? at(t, o.out, o.out + 0.3, 'cubicIn') : 0; if (ko >= 1) return;
+    const w = (o.w || 430) * u, h = (o.h || 430) * u, fx = o.fromX != null ? o.fromX * u : null, dx = fx != null ? (1 - ki) * fx + ko * fx : 0, bob = 6 * u * Math.sin((t - o.s) * 2.4);
+    X.save(); X.translate(pick(o, 'x', ctx.W * 0.2) + dx, pick(o, 'y', ctx.H * 0.5) + bob); X.rotate(pick(o, 'rot', -0.09) + 0.01 * Math.sin((t - o.s) * 2)); const z = fx != null ? 1 : ki * (1 - ko); X.scale(z, z);
+    X.shadowColor = 'rgba(0,0,0,.45)'; X.shadowBlur = 34; X.shadowOffsetY = 18; X.fillStyle = '#fff'; X.fillRect(-w / 2 - 16 * u, -h / 2 - 16 * u, w + 32 * u, h + 32 * u + (o.tag ? 70 * u : 0)); X.shadowColor = 'transparent';
+    X.save(); X.beginPath(); X.rect(-w / 2, -h / 2, w, h); X.clip(); X.translate(-w / 2, -h / 2); o.draw(X, w, h); X.restore();
+    if (o.tag) ctx.text(X, o.tag, 0, h / 2 + 56 * u, { family: 'display', weight: 700, size: 52 * u, color: '#1b130e', maxWidth: w });
+    X.restore();
+  };
+
+  /* 105 رياكشن على الجنب — الصورة تتجمّد (غمّقها بخفة) وفيديو رد فعل (أي مقطع: ضحكة، صدمة، حزن) مائل يطلع على الجنب ويشتغل.
+     الصوت: whoosh-04 + صوت مقطع الرياكشن نفسه (طبّعه ‎-19 LUFS). o: {s, out?, video?(Y) = اللقطة المتجمدة, draw(Y,w,h) = إطار الرياكشن بزمن (t-s), x, y, w=640, tag?, dim=.22} */
+  FX.reactionPip = (ctx, t, o) => {
+    const { X } = ctx, u = U(ctx), w = Math.min((o.w || 640) * u, ctx.W * 0.55), h = w * 9 / 16;
+    if (o.video) { o.video(X); if (t >= o.s) { X.fillStyle = `rgba(0,0,0,${pick(o, 'dim', 0.22)})`; X.fillRect(0, 0, ctx.W, ctx.H); } }
+    FX.popPicture(ctx, t, { s: o.s + 0.15, out: o.out, x: pick(o, 'x', ctx.W - w / 2 - 100 * u), y: pick(o, 'y', ctx.H * 0.55), w, h, rot: -0.06, fromX: 900, tag: o.tag,
+      draw: (Y, ww, hh) => o.draw(Y, ww, hh, t - o.s - 0.15) });
+  };
+
+  /* 106 تقويم يقلب — صفحات تقلب شهر شهر (ورق فليب) من تاريخ لتاريخ، وتدور دائرة حمرا حول اليوم. لأي «مرّ وقت» (بعد سنة، من ذاك اليوم لليوم).
+     الصوت: ui-05 (تكّة) لكل قلبة، game-03 عند الوصول. ترجع عدد القلبات (للعدّاد). o: {s, from:[y,m0], months, per=.17, hold=1.5, circle=day, x=W/2, y=H/2, w=1000, h=800} */
+  const MONTHS = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+  const WD = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+  const calPage = (ctx, X, y, m, w, h, circleK, day, u) => {
+    X.fillStyle = '#fbfaf7'; X.fillRect(0, 0, w, h); X.fillStyle = ctx.P.acc || '#c8322a'; X.fillRect(0, 0, w, 150 * u);
+    ctx.text(X, MONTHS[m] + ' ' + y, w / 2, 100 * u, { family: 'display', weight: 700, size: 92 * u, color: '#fff' });
+    const cw = (w - 80 * u) / 7, first = new Date(y, m, 1).getDay(), dim = new Date(y, m + 1, 0).getDate(), rh = (h - 250 * u) / 6;
+    for (let i = 0; i < 7; i++) ctx.text(X, WD[i], w - 40 * u - cw * (i + 0.5), 206 * u, { family: 'body', weight: 700, size: 31 * u, color: i === 5 ? '#c8322a' : '#6b6258' });
+    for (let d = 1; d <= dim; d++) { const idx = first + d - 1, r = Math.floor(idx / 7), c = idx % 7, px = w - 40 * u - cw * (c + 0.5), py = 250 * u + rh * (r + 0.5);
+      ctx.text(X, String(d), px, py + 17 * u, { family: 'num', weight: 700, size: 50 * u, color: c === 5 ? '#c8322a' : '#1b130e', dir: 'ltr' });
+      if (day && d === day && circleK > 0) { X.save(); X.strokeStyle = '#d4202a'; X.lineWidth = 9 * u; X.lineCap = 'round'; X.beginPath(); const n = 40;
+        for (let i = 0; i <= n * circleK; i++) { const a = -2.2 + i / n * 6.9, rr = (46 + 6 * Math.sin(i * 0.3) + i * 0.15) * u; i ? X.lineTo(px + rr * Math.cos(a) * 1.05, py + rr * Math.sin(a)) : X.moveTo(px + rr * Math.cos(a) * 1.05, py + rr * Math.sin(a)); }
+        X.stroke(); X.restore(); } } };
+  FX.calendarFlip = (ctx, t, o) => {
+    const { X, at } = ctx, u = U(ctx); if (t < o.s) return 0;
+    const ki = at(t, o.s, o.s + 0.5, 'backOut'), w = Math.min((o.w || 1000) * u, ctx.W * 0.92), h = (o.h || 800) * u * (w / ((o.w || 1000) * u)), hold = pick(o, 'hold', 1.5), per = pick(o, 'per', 0.17), n = o.months;
+    const lt = t - o.s - hold, [y0, m0] = o.from, flips = lt < 0 ? 0 : Math.min(n, Math.floor(lt / per)), ph = lt < 0 || lt >= n * per ? 0 : (lt / per) % 1, P = i => [y0 + Math.floor((m0 + i) / 12), (((m0 + i) % 12) + 12) % 12];
+    const circ = i => (i === 0 ? at(t, o.s + 0.7, o.s + 1.2, 'cubicOut') : (flips >= n && i === n ? at(t, o.s + hold + n * per + 0.15, o.s + hold + n * per + 0.7, 'cubicOut') : 0));
+    X.save(); X.translate(pick(o, 'x', ctx.W / 2), pick(o, 'y', ctx.H / 2)); X.scale(ki, ki); X.shadowColor = 'rgba(0,0,0,.5)'; X.shadowBlur = 50; X.shadowOffsetY = 24; X.fillStyle = '#fbfaf7';
+    X.beginPath(); X.roundRect(-w / 2, -h / 2, w, h, 40 * u); X.fill(); X.shadowColor = 'transparent'; X.beginPath(); X.roundRect(-w / 2, -h / 2, w, h, 40 * u); X.clip(); X.translate(-w / 2, -h / 2);
+    const drawP = (i, c0, c1, sy, piv) => { const [yy, mm] = P(i); X.save(); X.beginPath(); X.rect(0, c0, w, c1 - c0); X.clip(); if (sy !== 1) { X.translate(0, piv); X.scale(1, Math.max(0.001, sy)); X.translate(0, -piv); } calPage(ctx, X, yy, mm, w, h, circ(i), o.circle, u); X.restore(); };
+    const mi = flips, mi2 = flips + 1;
+    if (ph === 0) drawP(mi, 0, h, 1, h / 2);
+    else { drawP(mi2, 0, h / 2, 1, h / 2); drawP(mi, h / 2, h, 1, h / 2);                       // ورق فليب: النص العلوي يطبق ثم السفلي الجديد يفتح
+      if (ph < 0.5) drawP(mi, 0, h / 2, Math.cos(ph * Math.PI), h / 2); else drawP(mi2, h / 2, h, Math.cos((1 - ph) * Math.PI), h / 2);
+      X.fillStyle = 'rgba(0,0,0,' + 0.25 * Math.sin(ph * Math.PI) + ')'; X.fillRect(0, h / 2 - 3, w, 6); }
+    X.restore(); return flips;
+  };
+
+  /* 107 شاشة تنطفي — الشاشة تعتّم تقريباً لثانية مع جملة بالنص (نكتة صوت: صمت محرج، «بلا تعليق»، لحظة ما تنقال). خفّض أصوات الباقين بالمكساج.
+     o: {s, e, text, video?(Y), size=104} */
+  FX.blackoutGag = (ctx, t, o) => {
+    const { X, P, at } = ctx, u = U(ctx); if (o.video) o.video(X);
+    const kd = at(t, o.s, o.s + 0.3) * (1 - at(t, o.e - 0.3, o.e)); if (kd <= 0.01) return;
+    X.fillStyle = 'rgba(0,0,0,' + 0.94 * kd + ')'; X.fillRect(0, 0, ctx.W, ctx.H); const br = 0.5 + 0.5 * Math.sin((t - o.s) * 7);
+    X.save(); X.globalAlpha = 0.16 * kd * (0.4 + br); const g = X.createRadialGradient(ctx.W / 2, ctx.H / 2 - 30, 20, ctx.W / 2, ctx.H / 2 - 30, (360 + 40 * br) * u); g.addColorStop(0, P.ink); g.addColorStop(1, 'rgba(0,0,0,0)'); X.fillStyle = g; X.fillRect(0, 0, ctx.W, ctx.H); X.restore();
+    ctx.text(X, o.text, ctx.W / 2, ctx.H / 2 + 30 * u, { family: 'display', weight: 700, size: (o.size || 104) * u, color: P.ink, alpha: kd, maxWidth: ctx.W * 0.86 });
+  };
+
+  /* 108 لافتة تلطش — لافتة صفراء بإطار أبيض تلطش بالضربة وتهتز وتروح، مع خطوط انفجار. أي كلمة قصيرة من عندك. الصوت: hit-03 على o.pop.
+     o: {s, pop=s+.05, text='مفاجأة!', x=W*.78, y=H*.3, size=150, dur=1.2} */
+  FX.zotTag = (ctx, t, o) => {
+    const { X, at } = ctx, u = U(ctx), pop = pick(o, 'pop', o.s + 0.05), L = pick(o, 'dur', 1.2), k = at(t, pop, pop + 0.22, 'backOut') * (1 - at(t, o.s + L - 0.25, o.s + L, 'cubicIn')); if (k <= 0.01) return;
+    const size = (o.size || 150) * u, txt = pick(o, 'text', 'مفاجأة!'); X.save(); X.font = ctx.font('display', 700, size); const w = X.measureText(txt).width + 90 * u, h = size * 1.27; X.restore();
+    const x = pick(o, 'x', Math.min(ctx.W * 0.78, ctx.W - w / 2 - 50 * u)), y = pick(o, 'y', ctx.H * 0.3);
+    X.save(); X.translate(x, y); X.rotate(-0.13 + 0.03 * Math.sin((t - pop) * 18) * Math.exp(-(t - pop) * 5)); X.scale(k, k); X.font = ctx.font('display', 700, size);
+    X.shadowColor = 'rgba(0,0,0,.45)'; X.shadowBlur = 30; X.shadowOffsetY = 14; X.fillStyle = '#fff'; X.beginPath(); X.roundRect(-w / 2 - 12, -h / 2 - 12, w + 24, h + 24, 34 * u); X.fill();
+    X.shadowColor = 'transparent'; X.fillStyle = '#ffd21f'; X.beginPath(); X.roundRect(-w / 2, -h / 2, w, h, 26 * u); X.fill(); ctx.text(X, txt, 0, size * 0.35, { family: 'display', weight: 700, size, color: '#16100c' }); X.restore();
+    const b = at(t, pop, pop + 0.35, 'expoOut'), fb = 1 - at(t, pop + 0.2, pop + 0.5);
+    if (fb > 0) { X.save(); X.strokeStyle = '#fff'; X.lineWidth = 10 * u; X.lineCap = 'round'; X.globalAlpha = fb; for (let i = 0; i < 8; i++) { const a = i * 0.785 + 0.39, r0 = (170 + 50 * b) * u, r1 = r0 + 70 * u * b;
+      X.beginPath(); X.moveTo(x + Math.cos(a) * r0 * 1.3, y + Math.sin(a) * r0 * 0.8); X.lineTo(x + Math.cos(a) * r1 * 1.3, y + Math.sin(a) * r1 * 0.8); X.stroke(); } X.restore(); }
+  };
+
+  /* ── ب) أدوات معلومة بلمسة حركة ─────────────────────────────── */
+
+  /* 109 خط الطريق — خط منقّط يرسم نفسه ونقطة سيارة تمشي عليه، وعدّاد (دقيقة/كم) يعدّ. فوق لقطة الطريق. o: {s, e, dest='الوجهة', from='من أول لقطة', count:{to:74, unit:'دقيقة'}} */
+  FX.routeTrace = (ctx, t, o) => {
+    const { X, P, at } = ctx, u = U(ctx), W = ctx.W, e = o.e, k = at(t, o.s + 0.3, e - 0.3, 'cubicInOut'), pa = at(t, o.s, o.s + 0.5, 'expoOut') * (1 - at(t, e - 0.45, e - 0.05)); if (pa <= 0.01) return;
+    const x0 = W * 0.14, x1 = W * 0.86, y0 = 330 * u, pt = q => [x0 + (x1 - x0) * q, y0 - 40 * u * q + 50 * u * Math.sin(q * 5.2)];
+    X.save(); X.globalAlpha = pa; X.fillStyle = 'rgba(14,10,7,.62)'; X.beginPath(); X.roundRect(W * 0.08, 60 * u, W * 0.84, 340 * u, 36 * u); X.fill();
+    X.strokeStyle = 'rgba(244,234,216,.45)'; X.lineWidth = 7 * u; X.setLineDash([2, 22 * u]); X.lineCap = 'round'; X.beginPath(); for (let i = 0; i <= 80; i++) { const [x, y] = pt(i / 80); i ? X.lineTo(x, y) : X.moveTo(x, y); } X.stroke();
+    X.setLineDash([]); X.strokeStyle = P.hi; X.lineWidth = 9 * u; X.beginPath(); for (let i = 0; i <= 80 * k; i++) { const [x, y] = pt(i / 80); i ? X.lineTo(x, y) : X.moveTo(x, y); } X.stroke();
+    const [cx, cy] = pt(k); X.fillStyle = P.acc; X.beginPath(); X.arc(cx, cy, 20 * u, 0, 6.2832); X.fill(); X.strokeStyle = '#fff'; X.lineWidth = 5 * u; X.stroke();
+    const [ex, ey] = pt(1); X.fillStyle = P.hi; X.beginPath(); X.arc(ex, ey, 14 * u, 0, 6.2832); X.fill();
+    ctx.text(X, pick(o, 'dest', 'الوجهة'), ex, ey - 56 * u, { family: 'display', weight: 700, size: 58 * u, color: P.hi }); ctx.text(X, pick(o, 'from', 'من أول لقطة'), x0 + 90 * u, y0 + 96 * u, { family: 'body', weight: 500, size: 40 * u, color: P.ink });
+    if (o.count) ctx.text(X, Math.round(o.count.to * k) + ' ' + (o.count.unit || ''), W / 2, 160 * u, { family: 'display', weight: 700, size: 76 * u, color: P.ink }); X.restore();
+  };
+
+  /* 110 مقياس ينزل — عدّاد نصف دائري بثلاث ألوان وإبرة (ضغط، بنزين، بطارية، صبر). o: {s, e, from=35, to=15, min=10, max=40, unit='', label='القياس', x=330u, y=360u, r=190} */
+  FX.gaugeDrop = (ctx, t, o) => {
+    const { X, P, at } = ctx, u = U(ctx), e = o.e, k = at(t, o.s + 0.4, e - 0.6, 'cubicInOut'), pa = at(t, o.s, o.s + 0.45, 'expoOut') * (1 - at(t, e - 0.3, e)); if (pa <= 0.01) return;
+    const cx = pick(o, 'x', 330 * u), cy = pick(o, 'y', 360 * u), R = (o.r || 190) * u, a0 = Math.PI * 0.8, a1 = Math.PI * 2.2, from = pick(o, 'from', 35), to = pick(o, 'to', 15), mn = pick(o, 'min', 10), mx = pick(o, 'max', 40);
+    const val = lerp(from, to, k), q = cl((val - mn) / (mx - mn)); X.save(); X.globalAlpha = pa; X.fillStyle = 'rgba(14,10,7,.72)'; X.beginPath(); X.roundRect(cx - R * 1.45, cy - R * 1.0, R * 2.9, R * 2.45, 40 * u); X.fill();
+    X.lineWidth = 26 * u; X.lineCap = 'butt'; for (let i = 0; i < 3; i++) { X.strokeStyle = ['#7fbf72', P.hi, P.acc][i]; X.beginPath(); X.arc(cx, cy, R, a0 + (a1 - a0) * (1 - (i + 1) / 3), a0 + (a1 - a0) * (1 - i / 3)); X.stroke(); }
+    const ang = a0 + (a1 - a0) * (1 - q); X.strokeStyle = P.ink; X.lineWidth = 10 * u; X.lineCap = 'round'; X.beginPath(); X.moveTo(cx, cy); X.lineTo(cx + Math.cos(ang) * (R - 24 * u), cy + Math.sin(ang) * (R - 24 * u)); X.stroke();
+    X.fillStyle = P.ink; X.beginPath(); X.arc(cx, cy, 16 * u, 0, 6.2832); X.fill();
+    ctx.text(X, Math.round(val) + ' ' + pick(o, 'unit', ''), cx, cy + 120 * u, { family: 'num', weight: 800, size: 78 * u, color: P.ink, dir: 'ltr' }); ctx.text(X, pick(o, 'label', 'القياس'), cx, cy + 212 * u, { family: 'display', weight: 700, size: 50 * u, color: P.hi }); X.restore();
+  };
+
+  /* 111 حلقة نسبة — حلقة تفرغ من 100% لـ0% (أكل، شحن، صبر). تلوّن أصفر ← برتقالي ← أحمر. o: {s, e, label='النسبة', from=1, to=0, x=250u, y=305u, r=125} */
+  FX.ringCount = (ctx, t, o) => {
+    const { X, P, at } = ctx, u = U(ctx), e = o.e, k = at(t, o.s + 0.4, e - 0.8, 'cubicInOut'), pa = at(t, o.s, o.s + 0.45, 'expoOut') * (1 - at(t, e - 0.35, e)); if (pa <= 0.01) return;
+    const cx = pick(o, 'x', 250 * u), cy = pick(o, 'y', 305 * u), R = (o.r || 125) * u, v = lerp(pick(o, 'from', 1), pick(o, 'to', 0), k);
+    X.save(); X.globalAlpha = pa; X.fillStyle = 'rgba(14,10,7,.75)'; X.beginPath(); X.roundRect(cx - R * 1.52, cy - R * 1.85, R * 3.04, R * 3.15, 36 * u); X.fill();
+    X.lineWidth = 26 * u; X.strokeStyle = 'rgba(244,234,216,.2)'; X.beginPath(); X.arc(cx, cy - 10 * u, R, 0, 6.2832); X.stroke();
+    X.strokeStyle = v > 0.5 ? P.hi : (v > 0.2 ? '#e08a2e' : P.acc); X.lineCap = 'round'; X.beginPath(); X.arc(cx, cy - 10 * u, R, -Math.PI / 2, -Math.PI / 2 + 6.2832 * v); X.stroke();
+    ctx.text(X, Math.round(v * 100) + '%', cx, cy + 20 * u, { family: 'num', weight: 800, size: 74 * u, color: P.ink, dir: 'ltr' }); ctx.text(X, pick(o, 'label', 'النسبة'), cx, cy - R - 36 * u, { family: 'display', weight: 700, size: 54 * u, color: P.hi }); X.restore();
+  };
+
+  /* 112 بوصلة — قرص ومؤشر يتأرجح ويستقر على الدرجة (اتجاه، «وين نروح؟»). o: {s, e, deg=240, label='الاتجاه', x=W-340u, y=400u, r=200} */
+  FX.compassSwing = (ctx, t, o) => {
+    const { X, P, at } = ctx, u = U(ctx), e = o.e, pa = at(t, o.s, o.s + 0.45, 'expoOut') * (1 - at(t, e - 0.35, e)), sw = at(t, o.s + 0.3, e - 1.4, 'expoOut'); if (pa <= 0.01) return;
+    const lt = t - o.s, cx = pick(o, 'x', ctx.W - 340 * u), cy = pick(o, 'y', 400 * u), R = (o.r || 200) * u, deg0 = pick(o, 'deg', 240);
+    X.save(); X.globalAlpha = pa; X.fillStyle = 'rgba(14,10,7,.78)'; X.beginPath(); X.arc(cx, cy, R + 40 * u, 0, 6.2832); X.fill(); X.strokeStyle = P.hi; X.lineWidth = 8 * u; X.beginPath(); X.arc(cx, cy, R + 40 * u, 0, 6.2832); X.stroke();
+    for (let i = 0; i < 36; i++) { const a = i * Math.PI / 18, l = (i % 9 === 0 ? 34 : 16) * u; X.strokeStyle = P.ink; X.lineWidth = (i % 9 === 0 ? 6 : 3) * u; X.beginPath(); X.moveTo(cx + Math.cos(a) * (R - l), cy + Math.sin(a) * (R - l)); X.lineTo(cx + Math.cos(a) * R, cy + Math.sin(a) * R); X.stroke(); }
+    const deg = deg0 + (1 - sw) * 540 * Math.cos(lt * 5) * Math.exp(-lt * 0.6), ang = (deg - 90) * Math.PI / 180;
+    X.strokeStyle = P.acc; X.lineWidth = 14 * u; X.lineCap = 'round'; X.beginPath(); X.moveTo(cx - Math.cos(ang) * 40 * u, cy - Math.sin(ang) * 40 * u); X.lineTo(cx + Math.cos(ang) * (R - 40 * u), cy + Math.sin(ang) * (R - 40 * u)); X.stroke();
+    X.fillStyle = P.hi; X.beginPath(); X.arc(cx, cy, 16 * u, 0, 6.2832); X.fill();
+    ctx.text(X, Math.round(((deg % 360) + 360) % 360) + '°', cx, cy + R + 120 * u, { family: 'num', weight: 800, size: 84 * u, color: P.ink, dir: 'ltr' }); ctx.text(X, pick(o, 'label', 'الاتجاه'), cx, cy - R - 62 * u, { family: 'display', weight: 700, size: 70 * u, color: P.hi }); X.restore();
+  };
+
+  /* 113 شريط ضيف — شريط وثائقي تحت اليمين: شارة حمرا («ضيف») + اسم كبير + سطر صغير. لضيف، مفاجأة، شخص جديد، حيوان. o: {s, e, tag='ضيف', name, sub?} */
+  FX.guestTag = (ctx, t, o) => {
+    const { X, P, at } = ctx, u = U(ctx), ka = at(t, o.s + 0.3, o.s + 0.9, 'expoOut'), ko = 1 - at(t, o.e - 0.5, o.e); if (ka * ko <= 0.01) return;
+    const bx = ctx.W - 140 * u, by = ctx.H - 250 * u, bw = Math.min(760 * u, ctx.W * 0.8) * ka;
+    X.save(); X.globalAlpha = ko; X.fillStyle = 'rgba(14,10,7,.86)'; X.beginPath(); X.roundRect(bx - bw, by, bw, 190 * u, 26 * u); X.fill(); X.fillStyle = P.acc; X.beginPath(); X.roundRect(bx - 230 * u, by - 30 * u, 230 * u, 60 * u, 16 * u); X.fill();
+    ctx.text(X, pick(o, 'tag', 'ضيف'), bx - 115 * u, by + 16 * u, { family: 'display', weight: 700, size: 40 * u, color: '#fff' });
+    if (ka > 0.7) { ctx.text(X, o.name, bx - 40 * u, by + 112 * u, { family: 'display', weight: 700, size: 92 * u, color: P.hi, align: 'right' }); if (o.sub) ctx.text(X, o.sub, bx - 40 * u, by + 168 * u, { family: 'body', weight: 500, size: 38 * u, color: P.ink, align: 'right' }); } X.restore();
+  };
+
+  /* 114 قائمة شكر — لوحة «شكرًا لـ» وصفوف (دور ← اسم) كل صف يهبط على الكلمة اللي تنقال. ثبّت rows[i][2] على وقت الكلمة من التفريغ. الصوت: ui-01 لكل صف.
+     o: {s, e, title='شكرًا لـ', rows:[[role, name, tLocal, sub?]]} */
+  FX.thanksRoll = (ctx, t, o) => {
+    const { X, P, at } = ctx, u = U(ctx), pa = at(t, o.s, o.s + 0.5, 'expoOut') * (1 - at(t, o.e - 0.4, o.e)), n = o.rows.length, pw = Math.min(860 * u, ctx.W * 0.9), px = ctx.W - 80 * u;
+    if (pa > 0.01) { X.save(); X.globalAlpha = pa; X.fillStyle = 'rgba(14,10,7,.7)'; X.beginPath(); X.roundRect(px - pw, 90 * u, pw, (150 + n * 130) * u, 40 * u); X.fill(); ctx.text(X, pick(o, 'title', 'شكرًا لـ'), px - pw / 2, 190 * u, { family: 'display', weight: 700, size: 70 * u, color: P.hi }); X.restore(); }
+    o.rows.forEach((r, j) => { const k = at(t, r[2], r[2] + 0.45, 'backOut'), ko = 1 - at(t, o.e - 0.4, o.e); if (k <= 0.01) return;
+      X.save(); X.globalAlpha = Math.min(1, k * 2) * ko; X.translate((1 - k) * 160 * u, 0);
+      ctx.text(X, r[0], px - 50 * u, 320 * u + j * 130 * u, { family: 'display', weight: 700, size: 76 * u, color: P.ink, align: 'right' }); ctx.text(X, r[1], px - 420 * u, 320 * u + j * 130 * u, { family: 'display', weight: 700, size: 76 * u, color: P.hi, align: 'right' });
+      if (r[3]) ctx.text(X, r[3], px - 420 * u, 366 * u + j * 130 * u, { family: 'body', weight: 500, size: 34 * u, color: P.ink, align: 'right' }); X.restore(); });
+  };
+
+  /* 115 جدول تطوّر — جدول مراحل (2–3 أعمدة) تهبط صفوفه وحدة وحدة، والخلية الأخيرة تتضوّى، وختم اختياري بالآخر. ارسم الخلفية قبله (غامقة).
+     o: {s, title='مراحل التطوّر', cols:['المرحلة الأولى','المرحلة الثانية','المرحلة الثالثة'], rows:[[label, a, b, c]], per=1.4, light=rowIndexToHighlight, stamp?:{text, at}}  */
+  FX.evolveTable = (ctx, t, o) => {
+    const { X, P, at } = ctx, u = U(ctx), W = ctx.W, nc = o.cols.length, L = W * 0.08, R = W - W * 0.08, FW = Math.min(260 * u, W * 0.2), CW = (R - L - FW) / nc, per = pick(o, 'per', 1.4), s0 = o.s, rowH = 96 * u, gap = 106 * u;
+    const kh = at(t, s0 + 0.1, s0 + 0.6, 'expoOut'); ctx.text(X, pick(o, 'title', 'مراحل التطوّر'), W / 2, 130 * u - 20 * u * (1 - kh), { family: 'display', weight: 700, size: 76 * u, color: P.hi, alpha: kh });
+    X.save(); X.globalAlpha = kh; X.fillStyle = P.acc; X.beginPath(); X.roundRect(L, 166 * u, R - L - FW - 14 * u, 80 * u, 18 * u); X.fill(); X.restore();
+    o.cols.forEach((c, i) => ctx.text(X, c, R - FW - CW * (i + 0.5) - 7 * u, 220 * u, { family: 'display', weight: 700, size: 46 * u, color: P.ink, alpha: kh, maxWidth: CW - 20 * u }));
+    o.rows.forEach((r, j) => { const t0 = s0 + 0.7 + per * j, y = 262 * u + j * gap, k = at(t, t0, t0 + 0.45, 'expoOut'); if (k <= 0) return;
+      X.save(); X.globalAlpha = k; X.translate(140 * u * (1 - k), 0); X.fillStyle = 'rgba(20,14,10,.8)'; X.beginPath(); X.roundRect(L, y, R - L, rowH, 18 * u); X.fill(); X.fillStyle = P.hi; X.fillRect(R - 8 * u, y + 12 * u, 8 * u, rowH - 24 * u);
+      ctx.text(X, r[0], R - FW / 2 - 8 * u, y + 64 * u, { family: 'display', weight: 700, size: 54 * u, color: P.hi, maxWidth: FW - 20 * u });
+      for (let i = 1; i <= nc; i++) { const k2 = at(t, t0 + 0.2 + 0.28 * i, t0 + 0.2 + 0.28 * i + 0.4, 'backOut'); if (k2 <= 0.01) continue; const cx = R - FW - CW * (i - 0.5) - 7 * u, last = i === nc;
+        X.save(); X.translate(cx, y + 50 * u); X.scale(k2, k2); ctx.text(X, r[i], 0, 16 * u, { family: last ? 'display' : 'body', weight: last ? 700 : 500, size: (last ? 46 : 42) * u, color: last ? '#fff' : P.ink, maxWidth: CW - 30 * u }); X.restore();
+        if (i < nc) { X.save(); X.globalAlpha = k2; X.strokeStyle = P.hi; X.lineWidth = 5 * u; X.lineCap = 'round'; const ax = cx - CW / 2 + 2 * u, ay = y + 48 * u; X.beginPath(); X.moveTo(ax + 16 * u, ay); X.lineTo(ax - 16 * u, ay); X.moveTo(ax - 4 * u, ay - 11 * u); X.lineTo(ax - 16 * u, ay); X.lineTo(ax - 4 * u, ay + 11 * u); X.stroke(); X.restore(); } }
+      X.restore(); });
+    if (o.light != null) { const tl = s0 + 0.7 + per * o.light + 0.2 + 0.28 * nc + 0.5, kg = at(t, tl, tl + 0.4, 'backOut'); if (kg > 0.01) { X.save(); X.globalAlpha = kg; X.strokeStyle = P.hi; X.lineWidth = 6 * u; const cx = R - FW - CW * (nc - 0.5) - 7 * u; X.beginPath(); X.roundRect(cx - CW / 2 + 8 * u, 262 * u + o.light * gap + 4 * u, CW - 16 * u, rowH - 8 * u, 16 * u); X.stroke(); X.restore(); } }
+    if (o.stamp) FX.stampSlam(ctx, t, { s: o.stamp.at, text: o.stamp.text, x: W / 2, y: 262 * u + o.rows.length * gap + 70 * u, rot: -0.04, color: P.acc, size: 56, w: 880, h: 132 });
+  };
+
+  /* ── ج) انتقال ─────────────────────────────────────────────────── */
+
+  /* 116 انتقال نار — تسريب ضوء برتقالي يكسح من لقطة للثانية وجمر يطلع من تحت. من الغروب لليل، من الصبح للظهر، من الهدوء للحماس. الصوت: whoosh-05.
+     o: {s, dur=1, A, B}  A وB دوال ترسم الإطار كامل (بأبعاد اللوحة الحالية) */
+  FX.fireLeak = (ctx, t, o) => {
+    const { X } = ctx, d = pick(o, 'dur', 1), sx = ctx.W / 1080, sy = ctx.H / 1920, lt = t - o.s, fit = fn => Y => { Y.save(); Y.scale(1 / sx, 1 / sy); fn(Y); Y.restore(); };
+    X.save(); X.scale(sx, sy); FX.lightLeak(ctx, t, { s: o.s, dur: d, A: fit(o.A), B: fit(o.B), colors: ['#ff9a2e', '#ff4d1a'] }); X.restore();
+    if (lt < 0 || lt > d) return;
+    for (let n = 0; n < 46; n++) { const x = ctx.hash01(n, 1, 7) * ctx.W, v = 160 + ctx.hash01(n, 2, 7) * 380, y0 = ctx.H + 40 - (lt * v + ctx.hash01(n, 3, 7) * 300) % (ctx.H + 120);
+      const fl = 0.5 + 0.5 * Math.sin(lt * 18 + n), al = Math.sin(Math.PI * Math.min(1, lt / d)) * (0.5 + 0.5 * fl);
+      X.fillStyle = 'rgba(255,' + (150 + Math.round(ctx.hash01(n, 4, 7) * 80)) + ',60,' + al.toFixed(2) + ')'; X.beginPath(); X.arc(x + 28 * Math.sin(lt * 3 + n), y0, 3 + ctx.hash01(n, 5, 7) * 5, 0, 6.2832); X.fill(); }
+  };
+
+  /* ── د) تنبيهات وأسماء ─────────────────────────────────────────── */
+
+  /* 117 شريط تنبيه — «تنبيه» أو «عاجل»: شريط أحمر بالعرض ينزلق من اليمين وشارة بيضاء وجملة. الجملة من عندك.
+     الصوت: ui-04 (بيب) عند o.s. o: {s, e, kind:'alert'|'breaking', text, y=H*.78} */
+  FX.newsBar = (ctx, t, o) => {
+    const { X, P, at } = ctx, u = U(ctx), ki = at(t, o.s, o.s + 0.4, 'expoOut'), ko = 1 - at(t, o.e - 0.3, o.e); if (ki * ko <= 0.01) return;
+    const label = o.kind === 'breaking' ? 'عاجل' : 'تنبيه', y = pick(o, 'y', ctx.H * 0.78), bh = 92 * u, red = '#c81c1c';
+    X.save(); X.globalAlpha = ko; X.translate((1 - ki) * ctx.W, 0); X.fillStyle = red; X.fillRect(0, y, ctx.W, bh);
+    X.fillStyle = '#fff'; X.beginPath(); X.roundRect(ctx.W - 60 * u - 190 * u, y - 52 * u, 190 * u, 70 * u, 6 * u); X.fill(); ctx.text(X, label, ctx.W - 60 * u - 95 * u, y - 4 * u, { family: 'display', weight: 700, size: 52 * u, color: red });
+    ctx.text(X, o.text, (ctx.W - 290 * u) / 2, y + 64 * u, { family: 'display', weight: 700, size: 50 * u, color: '#fff', maxWidth: ctx.W - 380 * u }); X.restore();
+  };
+
+  /* 118 سهم اسم — بطاقة اسم (واختياري دور) فوق الرأس وسهم ينزل عليه. يتتبع نقطة متحركة بـ keys. أول ظهور بس — بعدها الجمهور عارفهم.
+     الصوت: ui-02 عند o.s. o: {s, e, name, role?, x, y, keys?:[[t,x,y],…], color=P.acc}  (x,y = أعلى الرأس) */
+  FX.nameArrow = (ctx, t, o) => {
+    const { X, P, at } = ctx, u = U(ctx), ki = at(t, o.s, o.s + 0.3, 'backOut'), ko = 1 - at(t, o.e - 0.2, o.e); if (ki * ko <= 0.01) return;
+    let x = o.x, y = o.y; if (o.keys && o.keys.length) { const K = o.keys; if (t <= K[0][0]) { x = K[0][1]; y = K[0][2]; } else if (t >= K[K.length - 1][0]) { x = K[K.length - 1][1]; y = K[K.length - 1][2]; }
+      else for (let i = 0; i < K.length - 1; i++) if (t >= K[i][0] && t < K[i + 1][0]) { const q = (t - K[i][0]) / (K[i + 1][0] - K[i][0]); x = lerp(K[i][1], K[i + 1][1], q); y = lerp(K[i][2], K[i + 1][2], q); } }
+    const col = o.color || P.acc, f1 = 66 * u, bw = Math.max(240 * u, String(o.name).length * 40 * u + 64 * u), bh = (o.role ? 150 : 96) * u, bottom = Math.max(y - 78 * u, bh + 24 * u), top = bottom - bh;
+    X.save(); X.globalAlpha = ko; X.translate(x, bottom); X.scale(ki, ki); X.translate(-x, -bottom); X.fillStyle = col; X.beginPath(); X.roundRect(x - bw / 2, top, bw, bh, 18 * u); X.fill();
+    ctx.text(X, o.name, x, top + (o.role ? 70 : 68) * u, { family: 'display', weight: 700, size: f1, color: '#fff', maxWidth: bw - 30 * u }); if (o.role) ctx.text(X, o.role, x, top + 126 * u, { family: 'body', weight: 500, size: 38 * u, color: '#ffe2d6' });
+    X.strokeStyle = '#fff'; X.fillStyle = '#fff'; X.lineWidth = 12 * u; X.lineCap = 'round'; X.beginPath(); X.moveTo(x, bottom + 6 * u); X.lineTo(x, y - 44 * u); X.stroke(); X.beginPath(); X.moveTo(x, y - 6 * u); X.lineTo(x - 26 * u, y - 50 * u); X.lineTo(x + 26 * u, y - 50 * u); X.closePath(); X.fill(); X.restore();
+  };
+
+  /* 119 كابشن بخط — كابشن عادي (صندوق أسود) وكلمة وحدة مخطوط تحتها بلون ذهبي: الكلمة اللي تبي تعلّق عليها.
+     o: {s, e, text, word, y=H-64u, size=60, color=P.hi}  — الكلمة لازم تكون بالنص. */
+  FX.underlineCaption = (ctx, t, o) => {
+    const { X, P } = ctx, u = U(ctx); if (t < o.s || t >= o.e) return;
+    const size = (o.size || 60) * u, y = pick(o, 'y', ctx.H - 64 * u); X.save(); X.font = ctx.font('body', 500, size); const tw = X.measureText(o.text).width, bw = tw + 60 * u, bh = size * 1.4 + 20 * u;
+    X.fillStyle = 'rgba(0,0,0,.67)'; X.beginPath(); X.roundRect(ctx.W / 2 - bw / 2, y - bh, bw, bh, 14 * u); X.fill(); ctx.text(X, o.text, ctx.W / 2, y - bh / 2 + size * 0.34, { family: 'body', weight: 500, size, color: '#fff' });
+    const i = o.text.lastIndexOf(o.word); if (i >= 0) { const right = ctx.W / 2 + tw / 2, pre = X.measureText(o.text.slice(0, i)).width, ww = X.measureText(o.word).width, wr = right - pre, wl = wr - ww, yy = y - 20 * u;
+      X.fillStyle = 'rgba(0,0,0,.6)'; X.beginPath(); X.roundRect(wl + 2, yy + 3, wr - wl - 4, 7 * u, 3); X.fill(); X.fillStyle = o.color || P.hi; X.beginPath(); X.roundRect(wl + 2, yy, wr - wl - 4, 7 * u, 3); X.fill(); } X.restore();
+  };
+})();
+
+/* ═══ moves-landscape.js — نسخ 16:9 (أي W×H) من حركات البنك اللي صممها الأصل بـ1080×1920 ═══
+   نفس العقد: FX16.<id>(ctx, t, o) — A وB وvideo وlive دوال ترسم الإطار كامل. تاخذ المقاس من ctx.W/ctx.H.
+   • whip = نسخة #11 سحبة · nuqtaCurtain = #76 ستارة النقاط · chapterTilt = #71 ميلة الفصل
+     doorway = #97 باب ينفتح · pageTurnRTL = #69 صفحة كتاب عربي · stickerFreeze = #65 تجميد ستيكر
+   • للفيديو الأفقي (يوتيوب، ونشوت، فلوق) — الأصل ما يرسمها إلا طولي. حمّلها بعد moves.js: <script src="./moves-landscape.js">.
+   • عشان انتقال A→B بالأفقي: ارسم A وB بحجم اللوحة كاملة (مو 1080×1920). */
+(function () {
+  const cl = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+  const pr = (t, a, b) => cl((t - a) / (b - a));
+  const lerp = (a, b, k) => a + (b - a) * k;
+  const off = (X, slot) => {                     // offscreen canvas the size of X, with X's transform
+    const me = FX16['_' + slot] || (FX16['_' + slot] = { c: document.createElement('canvas') }), c = me.c;
+    if (c.width !== X.canvas.width || c.height !== X.canvas.height) { c.width = X.canvas.width; c.height = X.canvas.height; }
+    const Y = c.getContext('2d'); Y.setTransform(1, 0, 0, 1, 0, 0); Y.globalAlpha = 1; Y.globalCompositeOperation = 'source-over'; Y.filter = 'none';
+    Y.clearRect(0, 0, c.width, c.height); Y.setTransform(X.getTransform()); return { c, Y };
+  };
+  const warpTri = (X, img, s, d) => {           // affine-map source triangle s onto destination triangle d
+    const [x0, y0, x1, y1, x2, y2] = s, [u0, v0, u1, v1, u2, v2] = d, den = (x1 - x0) * (y2 - y0) - (x2 - x0) * (y1 - y0); if (Math.abs(den) < 1e-6) return;
+    const a = ((u1 - u0) * (y2 - y0) - (u2 - u0) * (y1 - y0)) / den, c = ((u2 - u0) * (x1 - x0) - (u1 - u0) * (x2 - x0)) / den;
+    const b = ((v1 - v0) * (y2 - y0) - (v2 - v0) * (y1 - y0)) / den, dd = ((v2 - v0) * (x1 - x0) - (v1 - v0) * (x2 - x0)) / den;
+    const mx = (u0 + u1 + u2) / 3, my = (v0 + v1 + v2) / 3, inf = (u, v) => { const dx = u - mx, dy = v - my, l = Math.hypot(dx, dy) || 1; return [u + dx / l * 0.9, v + dy / l * 0.9]; };
+    X.save(); X.beginPath(); X.moveTo(...inf(u0, v0)); X.lineTo(...inf(u1, v1)); X.lineTo(...inf(u2, v2)); X.closePath(); X.clip();
+    X.transform(a, b, c, dd, u0 - a * x0 - c * y0, v0 - b * x0 - dd * y0); X.drawImage(img, 0, 0); X.restore();
+  };
+  const FX16 = {};
+
+  /* #11 سحبة — whip pan to the left with motion blur. o: {s, dur=.45, A, B} */
+  FX16.whip = (ctx, t, o) => {
+    const { X, E, W } = ctx, d = o.dur || 0.45, pos = tt => E.expoInOut(pr(tt, o.s, o.s + d)), k = pos(t);
+    const v = Math.abs(pos(t + 0.008) - pos(t - 0.008)) / 0.016, bl = Math.min(44, v * 9 * (0.6 / d)), N = bl > 1 ? 7 : 1;
+    for (let s = 0; s < N; s++) {
+      const dx = N > 1 ? (s / (N - 1) - 0.5) * bl * 4 : 0;
+      X.save(); X.globalAlpha = 1 / (s + 1); if (bl > 1) X.filter = `blur(${(bl / 3).toFixed(1)}px)`;
+      if (k < 0.999) { X.save(); X.translate(-W * k + dx, 0); o.A(X); X.restore(); }
+      if (k > 0.001) { X.save(); X.translate(W - W * k + dx, 0); o.B(X); X.restore(); }
+      X.restore();
+    }
+  };
+
+  /* #76 ستارة نقاط القلم — diamonds (the Arabic pen dot) grow outwards and reveal B. o: {s, A, B, from=[W/2,H/2], cell=110, speed=2300, dur=.3, edge} */
+  FX16.nuqtaCurtain = (ctx, t, o) => {
+    const { X, E, W, H, P } = ctx, c = o.cell || 110, sp = o.speed || 2300, d = o.dur || 0.3, org = o.from || [W / 2, H / 2];
+    if (t < o.s) { o.A(X); return; }
+    const maxD = Math.max(...[[0, 0], [W, 0], [0, H], [W, H]].map(q => Math.hypot(q[0] - org[0], q[1] - org[1])));
+    if (t >= o.s + maxD / sp + d) { o.B(X); return; }
+    o.A(X);
+    const R = Math.ceil(Math.max(W, H) / c) + 2, ca = Math.SQRT1_2, list = [];
+    for (let i = -R; i <= R; i++) for (let j = -R; j <= R; j++) {
+      const u = i * c, v = j * c, x = W / 2 + (u - v) * ca, y = H / 2 + (u + v) * ca; if (x < -c || x > W + c || y < -c || y > H + c) continue;
+      const t0 = o.s + Math.hypot(x - org[0], y - org[1]) / sp, k = E.cubicIn(pr(t, t0, t0 + d)); if (k <= 0) continue;
+      list.push([x, y, 0.8 * c * k * Math.SQRT2, k]); }
+    if (!list.length) return;
+    const dia = ([x, y, h]) => { X.moveTo(x, y - h); X.lineTo(x + h, y); X.lineTo(x, y + h); X.lineTo(x - h, y); X.closePath(); };
+    X.save(); X.beginPath(); list.forEach(dia); X.clip(); o.B(X); X.restore();
+    X.save(); X.strokeStyle = o.edge || P.acc; X.lineWidth = 3; X.lineJoin = 'round';
+    list.forEach(q => { if (q[3] < 0.97) { X.globalAlpha = 1 - q[3]; X.beginPath(); dia(q); X.stroke(); } }); X.restore();
+  };
+
+  /* #71 ميلة الفصل — the footage becomes a board tilted in 3D, the chapter card floats in from the right, holds, returns.
+     o: {s, out (default s+2.4), video, title, sub, num, dur=.6, rotY=-18, rotX=6, scale=.74} */
+  FX16.chapterTilt = (ctx, t, o) => {
+    const { X, P, at, W, H } = ctx, dur = o.dur || 0.6, out = o.out != null ? o.out : o.s + 2.4;
+    const k = at(t, o.s, o.s + dur, 'expoInOut') * (1 - at(t, out, out + dur, 'expoInOut'));
+    if (k <= 0.001) { o.video(X); return; }
+    const ay = (o.rotY == null ? -18 : o.rotY) * k * Math.PI / 180, ax = (o.rotX == null ? 6 : o.rotX) * k * Math.PI / 180;
+    const sc = 1 - (1 - (o.scale || 0.74)) * k, cx = W / 2 - 150 * k, cy = H / 2 - 40 * k, D = 2600;
+    const proj = (u, v) => { const px = (u - W / 2) * sc, py = (v - H / 2) * sc, x1 = px * Math.cos(ay), z1 = -px * Math.sin(ay);
+      const y2 = py * Math.cos(ax) - z1 * Math.sin(ax), z2 = py * Math.sin(ax) + z1 * Math.cos(ax), f = D / (D + z2); return [cx + x1 * f, cy + y2 * f]; };
+    const g = X.createRadialGradient(W / 2, H / 2, 100, W / 2, H / 2, W * 0.75); g.addColorStop(0, '#2a1f17'); g.addColorStop(1, '#0d0907');
+    X.fillStyle = g; X.fillRect(0, 0, W, H);
+    const A = off(X, 'tl'); A.Y.save(); A.Y.beginPath(); A.Y.roundRect(0, 0, W, H, 36 * k / sc); A.Y.clip(); o.video(A.Y); A.Y.restore();
+    const C = [proj(0, 0), proj(W, 0), proj(W, H), proj(0, H)];
+    X.save(); X.globalAlpha = 0.45 * k; X.shadowColor = 'rgba(0,0,0,.7)'; X.shadowBlur = 90; X.shadowOffsetY = 50; X.fillStyle = '#000';
+    X.beginPath(); C.forEach((p, i) => (i ? X.lineTo(p[0], p[1]) : X.moveTo(p[0], p[1]))); X.closePath(); X.fill(); X.restore();
+    const m = X.getTransform().a, gx = 12, gy = 8;
+    for (let j = 0; j < gy; j++) for (let i = 0; i < gx; i++) {
+      const u0 = W * i / gx, u1 = W * (i + 1) / gx, v0 = H * j / gy, v1 = H * (j + 1) / gy, a = proj(u0, v0), b = proj(u1, v0), c = proj(u1, v1), d = proj(u0, v1);
+      warpTri(X, A.c, [u0 * m, v0 * m, u1 * m, v0 * m, u1 * m, v1 * m], [...a, ...b, ...c]); warpTri(X, A.c, [u0 * m, v0 * m, u1 * m, v1 * m, u0 * m, v1 * m], [...a, ...c, ...d]); }
+    X.save(); X.globalAlpha = 0.55 * k; X.strokeStyle = 'rgba(255,255,255,.6)'; X.lineWidth = 2; X.beginPath(); X.moveTo(...C[0]); X.lineTo(...C[1]); X.stroke(); X.restore();
+    const kt = at(t, o.s + 0.25, o.s + 0.85, 'expoOut') * (1 - at(t, out - 0.15, out + 0.3, 'expoIn'));
+    if (kt > 0.01) {
+      const R = W - 90, y = H * 0.70, ts = 92, ss = 40;
+      X.save(); X.translate(620 * (1 - kt), 0); X.rotate(-0.025);
+      X.font = ctx.font('display', 700, ts); const tw = Math.max(X.measureText(o.title).width, (X.font = ctx.font('body', 500, ss), X.measureText(o.sub || '').width));
+      const bw = tw + 230, bh = o.sub ? 210 : 160;
+      X.shadowColor = 'rgba(0,0,0,.45)'; X.shadowBlur = 60; X.shadowOffsetY = 26; X.fillStyle = P.bg; X.beginPath(); X.roundRect(R - bw, y - bh / 2, bw, bh, 30); X.fill();
+      X.shadowColor = 'transparent'; X.fillStyle = P.acc; X.beginPath(); X.roundRect(R - 140, y - 60, 110, 120, 24); X.fill();
+      ctx.text(X, String(o.num || 1), R - 85, y + 34, { family: 'num', weight: 800, size: 84, color: '#fff', dir: 'ltr' });
+      X.fillStyle = P.hi; X.fillRect(R - bw + 40, y + bh / 2 - 16, bw - 200, 4);
+      ctx.text(X, o.title, R - 170, o.sub ? y + 8 : y + 30, { family: 'display', weight: 700, size: ts, align: 'right', color: P.ink });
+      if (o.sub) ctx.text(X, o.sub, R - 172, y + 68, { family: 'body', weight: 500, size: ss, align: 'right', color: P.mut });
+      X.restore();
+    }
+  };
+
+  /* #97 باب ينفتح — A splits into two doors swinging open in perspective, light spills through, B comes forward. o: {s, dur=.6, A, B} */
+  FX16.doorway = (ctx, t, o) => {
+    const { X, E, W, H } = ctx, d = o.dur || 0.6, hw = W / 2; if (t < o.s) { o.A(X); return; } if (t >= o.s + d + 0.3) { o.B(X); return; }
+    const k = E.expoIn(pr(t, o.s, o.s + d)), kb = E.expoOut(pr(t, o.s, o.s + d + 0.3)), th = k * 75 * Math.PI / 180, f = 1900;
+    X.fillStyle = '#0d0907'; X.fillRect(0, 0, W, H);
+    X.save(); const z = lerp(0.85, 1, kb); X.translate(W / 2, H / 2); X.scale(z, z); X.translate(-W / 2, -H / 2); o.B(X); X.restore();
+    const Ao = off(X, 'dr'); o.A(Ao.Y); const M = X.getTransform();
+    const pj = u => { const zz = u * Math.sin(th), sc = f / (f - zz); return { x: (u * Math.cos(th) - hw) * sc, sc }; };
+    const gapX = hw + pj(hw).x, la = (1 - pr(t, o.s + d * 0.7, o.s + d + 0.3)) * cl(k * 4);
+    if (la > 0) { const w2 = Math.max(0, hw - gapX) + 220, gl = X.createLinearGradient(hw - w2, 0, hw + w2, 0);
+      gl.addColorStop(0, 'rgba(255,240,210,0)'); gl.addColorStop(0.5, 'rgba(255,240,210,' + 0.65 * la + ')'); gl.addColorStop(1, 'rgba(255,240,210,0)');
+      X.save(); X.globalCompositeOperation = 'lighter'; X.fillStyle = gl; X.fillRect(hw - w2, 0, 2 * w2, H); X.restore(); }
+    const N = 80, du = hw / N, sn = Math.sin(th);
+    for (const side of [-1, 1]) { const ex = u => (side < 0 ? hw + pj(u).x : hw - pj(u).x);
+      for (let i = 0; i < N; i++) { const u0 = i * du, xa = ex(u0), xb = ex(u0 + du), pm = pj(u0 + du / 2);
+        const dl = Math.min(xa, xb), dw = Math.abs(xb - xa) + 1, hh = H * pm.sc; if (dl > W || dl + dw < 0) continue;
+        X.drawImage(Ao.c, Math.round(M.a * (side < 0 ? u0 : W - u0 - du) + M.e), M.f, Math.ceil(du * M.a), H * M.d, dl, H / 2 - hh / 2, dw, hh); }
+      if (sn > 0.01) { const x0 = ex(0), x1 = ex(hw), h1 = H * pj(hw).sc, sg = X.createLinearGradient(x0, 0, x1, 0);
+        sg.addColorStop(0, 'rgba(0,0,0,' + 0.2 * sn + ')'); sg.addColorStop(1, 'rgba(0,0,0,' + 0.5 * sn + ')'); X.fillStyle = sg;
+        X.beginPath(); X.moveTo(x0, 0); X.lineTo(x1, H / 2 - h1 / 2); X.lineTo(x1, H / 2 + h1 / 2); X.lineTo(x0, H); X.closePath(); X.fill(); } }
+  };
+
+  /* #69 صفحة كتاب عربي — the page turns from the left like an Arabic book (spine on the right). o: {s, dur=.9, A, B, tilt=6, paper} */
+  FX16.pageTurnRTL = (ctx, t, o) => {
+    const { X, E, W, H } = ctx, k = E.cubicInOut(pr(t, o.s, o.s + (o.dur || 0.9)));
+    if (k <= 0.001) { o.A(X); return; } if (k >= 0.999) { o.B(X); return; }
+    const th = (o.tilt == null ? 6 : o.tilt) * Math.PI / 180, xf = lerp(-300, W + 300, k), BIG = 4000;
+    const frame = () => { X.translate(W / 2, H / 2); X.rotate(th); X.translate(-W / 2, -H / 2); }, unframe = () => { X.translate(W / 2, H / 2); X.rotate(-th); X.translate(-W / 2, -H / 2); };
+    X.save(); frame(); X.beginPath(); X.rect(xf, -BIG, BIG, 3 * BIG); X.clip(); unframe(); o.A(X); X.restore();
+    X.save(); frame(); X.beginPath(); X.rect(-BIG, -BIG, xf + BIG, 3 * BIG); X.clip(); unframe(); o.B(X); frame();
+    const sg = X.createLinearGradient(xf, 0, xf - 70, 0); sg.addColorStop(0, 'rgba(0,0,0,.3)'); sg.addColorStop(1, 'rgba(0,0,0,0)'); X.fillStyle = sg; X.fillRect(xf - 70, -BIG, 70, 3 * BIG); X.restore();
+    const fw = xf + 300;
+    X.save(); frame(); X.beginPath(); X.rect(xf, -BIG, Math.max(0, fw), 3 * BIG); X.clip();
+    X.save(); X.shadowColor = 'rgba(0,0,0,.35)'; X.shadowBlur = 44; X.shadowOffsetX = 16; X.fillStyle = o.paper || '#efe4d0'; X.fillRect(xf, -BIG, Math.max(0, fw), 3 * BIG); X.restore();
+    X.save(); X.globalAlpha = 0.15; X.translate(2 * xf, 0); X.scale(-1, 1); unframe(); o.A(X); X.restore();
+    const g = X.createLinearGradient(xf, 0, xf + Math.max(1, fw), 0); g.addColorStop(0, 'rgba(0,0,0,.22)'); g.addColorStop(0.3, 'rgba(0,0,0,.04)'); g.addColorStop(0.75, 'rgba(255,255,255,.14)'); g.addColorStop(1, 'rgba(0,0,0,.08)');
+    X.fillStyle = g; X.fillRect(xf, -BIG, Math.max(1, fw), 3 * BIG); X.restore();
+  };
+
+  /* #65 تجميد ستيكر — flash, the frame freezes into a white-bordered polaroid over a halftone ground, a sticker word slaps on.
+     o: {s, out, still (Y)=>{} frozen frame, live (Y)=>{} footage after out, text} */
+  FX16.stickerFreeze = (ctx, t, o) => {
+    const { X, P, E, at, W, H } = ctx; if (t < o.s) { o.live(X); return; }
+    const ko = o.out != null ? at(t, o.out, o.out + 0.3, 'cubicIn') : 0; if (ko >= 1) { o.live(X); return; }
+    if (ko > 0) o.live(X);
+    X.save(); X.globalAlpha *= 1 - ko;
+    X.fillStyle = P.acc; X.fillRect(0, 0, W, H); X.fillStyle = 'rgba(255,255,255,.16)';
+    for (let y = 0; y < H + 40; y += 34) for (let x = (y / 34) % 2 ? 17 : 0; x < W + 40; x += 34) { const r = 2 + 6 * (y / H); X.beginPath(); X.arc(x, y, r, 0, 6.2832); X.fill(); }
+    const kp = E.backOut(pr(t, o.s + 0.06, o.s + 0.42)), Rw = 1180, Rh = 664, Rx = W / 2 - Rw / 2, Ry = 120, piv = [W / 2, Ry + Rh];
+    X.save(); X.translate(piv[0], piv[1] - 14 * kp); X.rotate(-3 * kp * Math.PI / 180); X.scale(1 - 0.06 * kp, 1 - 0.06 * kp); X.translate(-piv[0], -piv[1]);
+    X.shadowColor = 'rgba(0,0,0,.35)'; X.shadowBlur = 30 + 30 * kp; X.shadowOffsetY = 14 + 14 * kp; X.fillStyle = '#fff'; X.fillRect(Rx - 26, Ry - 26, Rw + 52, Rh + 150); X.shadowColor = 'transparent';
+    X.save(); X.beginPath(); X.rect(Rx, Ry, Rw, Rh); X.clip(); X.translate(Rx, Ry); X.scale(Rw / W, Rh / H); o.still(X); X.restore(); X.restore();
+    const kt = at(t, o.s + 0.22, o.s + 0.47, 'backOut') * (1 - (o.out != null ? at(t, o.out - 0.12, o.out + 0.1, 'cubicIn') : 0));
+    if (o.text && kt > 0.01) { const size = 92; X.save(); X.translate(W / 2 + 60, Ry + Rh + 92); X.rotate(3 * Math.PI / 180); const z = 1.3 - 0.3 * kt; X.scale(z, z); X.globalAlpha *= cl(kt * 3);
+      X.font = ctx.font('display', 700, size); const w = Math.min(1100, X.measureText(o.text).width) + 100, h = size * 1.5;
+      X.shadowColor = 'rgba(0,0,0,.3)'; X.shadowBlur = 22; X.shadowOffsetY = 12; X.fillStyle = '#fff'; X.beginPath(); X.roundRect(-w / 2 - 14, -h / 2 - 14, w + 28, h + 28, 40); X.fill(); X.shadowColor = 'transparent';
+      X.fillStyle = '#1b130e'; X.beginPath(); X.roundRect(-w / 2, -h / 2, w, h, 28); X.fill();
+      ctx.text(X, o.text, 0, size * 0.36, { family: 'display', weight: 700, size, color: '#fff', maxWidth: 1080 }); X.restore(); }
+    const fl = pr(t, o.s, o.s + 0.06); if (fl < 1) { X.fillStyle = 'rgba(255,255,255,' + (0.85 * (1 - fl)) + ')'; X.fillRect(0, 0, W, H); }
+    X.restore();
+  };
+
+  window.FX16 = FX16;
+})();
