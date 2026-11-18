@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+node_modules/
+*.part.mp3
+*.tmp
+.claude/settings.local.json
+.claude/skills/video-ad-editor/motion/moves/previews/
+Thumbs.db
+desktop.ini
+.DS_Store

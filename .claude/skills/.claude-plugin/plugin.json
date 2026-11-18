@@ -1,0 +1,16 @@
+{
+  "name": "video-edit-halal",
+  "version": "6.0.1-halal.8",
+  "description": "Arabic video editing for Claude Code — 5 skills: talking-head reels, 3D motion explainers, podcasts, beat-synced montage, covers & thumbnails, plus tools for the halal background-audio library (files in the halal-audio plugin). Based on video-edit 6.0.1. DaVinci Resolve is a separate add-on (majed-davinci).",
+  "author": {
+    "name": "Majed Alzaabi",
+    "url": "https://github.com/majedphotos"
+  },
+  "homepage": "https://github.com/majedphotos/video-ad-editor",
+  "repository": "https://github.com/majedphotos/video-ad-editor",
+  "license": "MIT",
+  "skills": [
+    "./"
+  ],
+  "displayName": "Video edit (halal)"
+}
